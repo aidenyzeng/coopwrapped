@@ -42,5 +42,5 @@ async function measure(path: string, seconds: number) {
 }
 
 (async () => {
-  for (const p of ["/sample/marathoner", "/"]) console.log(p.padEnd(20), JSON.stringify(await measure(p, 6)));
+  for (const p of (process.env.PAGES ?? "/sample/marathoner,/").split(",")) console.log(p.padEnd(20), JSON.stringify(await measure(p, 6)));
 })();

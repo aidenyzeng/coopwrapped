@@ -8,8 +8,8 @@ import { useEffect, useRef } from "react";
  * near the pointer, letters swell. The soft "ink" edge is an SVG filter: a small blur
  * whose alpha is re-thresholded, so edges stay crisp-ish but read as printed.
  *
- * Performance: font-variation changes repaint the filtered text, so the wave only runs
- * for a few seconds after load and while the pointer is near; otherwise it rests.
+ * Performance: font-variation changes re-flow and repaint the filtered text, so the wave
+ * only runs while the pointer is over the wordmark (load uses a CSS blur-in instead).
  */
 const TEXT = "co-wrapped";
 const REST = { w: 270, r: 90 }; // portfolios.here rests around wght ~267, ROND ~89
@@ -41,8 +41,8 @@ export function Wordmark({ className = "" }: { className?: string }) {
       });
       letterW = Math.max(30, h.getBoundingClientRect().width / TEXT.length);
     };
-    let activeUntil = performance.now() + 1800; // intro wave
-    let amp = 1; // eases to 0 when resting
+    let activeUntil = 0; // no automatic intro wave: it re-flows text every frame; the wave runs only while the pointer is near
+    let amp = 0; // eases toward 1 while the pointer is near, back to 0 after
     const start = performance.now();
 
     let lastWrite = 0;
@@ -92,7 +92,6 @@ export function Wordmark({ className = "" }: { className?: string }) {
     h.addEventListener("pointerenter", onEnter);
     h.addEventListener("pointermove", onMove);
     h.addEventListener("pointerleave", onLeave);
-    kick();
     return () => {
       cancelAnimationFrame(raf);
       h.removeEventListener("pointerenter", onEnter);

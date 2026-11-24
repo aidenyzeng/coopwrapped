@@ -82,7 +82,7 @@ Data flow: `text → parseTable → detectColumns → buildApplications (+issues
 - **Fonts are self-hosted** (Bricolage Grotesque variable woff2 for the web; static TTFs for the server). They're registered under their real family names because Skia collapses several weights registered under one alias.
 - **Share links store a summary, not a token in the URL.** Server-side social previews need server-side data (URL fragments never reach the server), and storage enables deletion. The stored summary is integers + enums only — no strings from the spreadsheet can be stored even by a modified client.
 - **No accounts, no database.** A key-value store is the only infrastructure, used only for opt-in links.
-- **Landing page is a single screen** (no scroll at 360×640 → 1920×1080; checked by `scripts/check-landing-fit.ts`). Wordmark "co-wrapped" is set in [Allo](https://allo.joshpuckett.me) by Josh Puckett (SIL OFL 1.1; licence in `public/fonts/ALLO-OFL.txt`), instanced to a 63 KB subset (opsz 32, wght 250–650, ROND 40–100). Each letter's weight and roundness ripple in a wave on load and swell toward the pointer; a blur + alpha-threshold SVG filter gives the soft "ink" edge. Below it, a CSS-3D ring of real sample cards whose geometry is pure CSS (container-query units), so it paints from server HTML before hydration; idle rotation is a compositor-driven Web Animation, and JS only runs while dragging or picking a card. Hovering the ring slows it to a quarter speed (it never stops); cards grow slightly on hover; buttons grow on hover and squish on press. The wordmark's gradient fill follows the front card's colours, as on portfolios.here. The app icon (`src/app/icon.svg`) is a gift-wrapped envelope gasping at its own bow.
+- **Landing page is a single screen** (no scroll at 360×640 → 1920×1080; checked by `scripts/check-landing-fit.ts`). Wordmark "co-wrapped" is set in [Allo](https://allo.joshpuckett.me) by Josh Puckett (SIL OFL 1.1; licence in `public/fonts/ALLO-OFL.txt`), instanced to a 63 KB subset (opsz 32, wght 250–650, ROND 40–100). Each letter's weight and roundness ripple and swell under the pointer (no automatic wave on load, which would re-flow text every frame); a blur + alpha-threshold SVG filter gives the soft "ink" edge. Below it, a CSS-3D ring of real sample cards whose geometry is pure CSS (container-query units), so it paints from server HTML before hydration; idle rotation is a compositor-driven Web Animation, and JS only runs while dragging or picking a card. Hovering the ring slows it to a quarter speed (it never stops); cards grow slightly on hover; buttons grow on hover and squish on press. The wordmark's gradient fill follows the front card's colours, as on portfolios.here. The app icon (`src/app/icon.svg`) is a gift-wrapped envelope gasping at its own bow.
 - **Exact duplicates are counted once by default** (with a visible warning and a toggle); near-duplicates are only flagged, because re-applying to the same company is normal.
 
 ## Metric semantics
@@ -103,16 +103,17 @@ All measurements taken on 2026-11-24 on a local production build (`next start`),
 
 **Tests:** 111 unit tests (vitest) and 23 end-to-end tests (Playwright; desktop + Pixel 7 emulation; 2 tests are intentionally desktop- or mobile-only, so 23 passed and 3 skipped in the full matrix) — all passing.
 
-**Smoothness** (`scripts/measure-smoothness.ts`: 6 s window after the intro, 4× CPU throttling, mobile viewport; main-thread time from Chrome's performance counters, compared against the previous commit built side by side):
+**Smoothness** (`scripts/measure-smoothness.ts`: 6 s windows, 4× CPU throttling, mobile viewport; main-thread time from Chrome's performance counters; previous commit `99156c1` and this build run side by side, 3 runs each):
 
-| Page | Before | After | Why |
-|---|---|---|---|
-| Story (`/sample/marathoner`) | 3,588 ms (script 2,387) | 1,210 ms (script 285) | Progress bar written to the DOM per frame; the state machine ticks every ~120 ms instead of every frame; `Slide` memoized |
-| Landing (`/`) | 3,670 ms (style 3,112) | 1,608 ms (style 900) | Ring rotation moved to a compositor Web Animation; no per-frame React updates |
+| Page / window | Before | After | Change | Why |
+|---|---|---|---|---|
+| Story (`/sample/marathoner`) | 2,011–2,661 ms | 818–906 ms | ≈ −65% | Progress bar written to the DOM per frame; the state machine ticks every ~120 ms instead of every frame; `Slide` memoized |
+| Landing, first 6 s after load | 1,607–2,566 ms (median 1,703) | 1,006–1,138 ms (median 1,126) | −34% | No automatic text-reflowing intro wave (the wave runs only under the pointer); ring geometry in CSS |
+| Landing, settled | 2,361–2,473 ms | 1,024–1,167 ms | −56% | Ring rotation is a compositor Web Animation; no per-frame React updates |
 
-**What a visitor sees first** (`scripts/measure-first-view.ts`: slow-4G network + 4× CPU, 3 runs, previous commit vs this build): the wordmark appears at 693–974 ms → 681–761 ms, and the front carousel card at **2,779–3,010 ms → 832–920 ms**. The previous build hid the ring until JavaScript had measured it; this one renders it from HTML.
+**What a visitor sees first** (`scripts/measure-first-view.ts`: slow-4G network + 4× CPU, 3 runs, previous commit vs this build): the wordmark appears at 693–974 ms → 688–747 ms, and the front carousel card at **2,779–3,010 ms → 834–890 ms**. The previous build hid the ring until JavaScript had measured it; this one renders it from HTML.
 
-That is also why Lighthouse's *simulated* LCP rose (≈760 ms → ≈2,650 ms; performance 100 → 96–97): the old build's largest paint was the wordmark text, because the cards weren't visible yet. Real LCP is unchanged or better (92–120 ms → 69–111 ms).
+That is also why Lighthouse's *simulated* LCP rose (≈760 ms → ≈2,650 ms; performance 100 → 96–97): the old build's largest paint was the wordmark text, because the cards weren't visible yet. Real LCP is unchanged or better (92–120 ms → 61–96 ms).
 
 Frame rate was ~60 fps in both builds in headless Chrome, so the gain shows up as CPU headroom (battery, older phones) rather than fps here.
 
