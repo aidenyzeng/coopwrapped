@@ -13,10 +13,8 @@ export function SiteHeader({ right }: { right?: ReactNode }) {
         </filter>
       </svg>
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-5 sm:px-8">
-        <Link href="/" className="press flex items-center gap-2.5" aria-label="co-wrapped home">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo.svg" alt="" width={30} height={30} className="h-[30px] w-[30px]" />
-          <span className="wordmark-sm text-[24px] tracking-[-0.045em]">co-wrapped</span>
+        <Link href="/" className="press wordmark-sm text-[24px] tracking-[-0.045em]" aria-label="co-wrapped home">
+          co-wrapped
         </Link>
         <nav aria-label="Main" className="flex items-center gap-5 text-[15px] text-ink/60">
           {right ?? (
