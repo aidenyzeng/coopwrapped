@@ -1,0 +1,164 @@
+@import "tailwindcss";
+
+/* Self-hosted fonts. Family names match the canvas renderer (src/lib/design/tokens.ts). */
+@font-face {
+  font-family: "Bricolage Grotesque";
+  src: url("/fonts/display.woff2") format("woff2");
+  font-weight: 200 800;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Instrument Serif";
+  src: url("/fonts/serif-italic.woff2") format("woff2");
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+:root {
+  --ink: #121116;
+  --paper: #f4eee3;
+  --tomato: #ff5a36;
+  --ultra: #3240f0;
+  --lime: #d8f65c;
+  --pink: #ffb0d5;
+  --mint: #86e6c4;
+  --sun: #ffc83a;
+  --muted: #5f5a55;
+  --line: #d8cfc0;
+}
+
+@theme inline {
+  --color-ink: var(--ink);
+  --color-paper: var(--paper);
+  --color-tomato: var(--tomato);
+  --color-ultra: var(--ultra);
+  --color-lime: var(--lime);
+  --color-pink: var(--pink);
+  --color-mint: var(--mint);
+  --color-sun: var(--sun);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --font-display: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Instrument Serif", ui-serif, Georgia, serif;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-optical-sizing: auto;
+}
+
+.font-serif-i {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Focus that works on every slide colour */
+:focus-visible {
+  outline: 3px solid var(--ink);
+  outline-offset: 3px;
+  box-shadow: 0 0 0 6px var(--paper);
+  border-radius: 6px;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 999px;
+  font-weight: 700;
+  padding: 0.85rem 1.4rem;
+  border: 2.5px solid var(--ink);
+  transition: transform 120ms ease, box-shadow 120ms ease;
+  box-shadow: 3px 3px 0 var(--ink);
+  min-height: 48px;
+}
+.btn:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0 var(--ink);
+}
+.btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 var(--ink);
+}
+.btn-primary {
+  background: var(--ink);
+  color: var(--paper);
+}
+.btn-secondary {
+  background: var(--paper);
+  color: var(--ink);
+}
+.btn-accent {
+  background: var(--tomato);
+  color: var(--ink);
+}
+
+/* Landing sample reel — CSS only so the landing page ships almost no JS */
+@keyframes reel {
+  0%, 22% { transform: translateY(0); }
+  25%, 47% { transform: translateY(-25%); }
+  50%, 72% { transform: translateY(-50%); }
+  75%, 97% { transform: translateY(-75%); }
+  100% { transform: translateY(0); }
+}
+.reel-track {
+  animation: reel 12s cubic-bezier(0.7, 0, 0.2, 1) infinite;
+}
+/* segment i fills during its quarter of the 12s loop and stays full until the loop restarts */
+@keyframes seg0 { 0% { transform: scaleX(0); } 25%, 99% { transform: scaleX(1); } 100% { transform: scaleX(0); } }
+@keyframes seg1 { 0%, 25% { transform: scaleX(0); } 50%, 99% { transform: scaleX(1); } 100% { transform: scaleX(0); } }
+@keyframes seg2 { 0%, 50% { transform: scaleX(0); } 75%, 99% { transform: scaleX(1); } 100% { transform: scaleX(0); } }
+@keyframes seg3 { 0%, 75% { transform: scaleX(0); } 99% { transform: scaleX(1); } 100% { transform: scaleX(0); } }
+.reel-progress > span { background: rgb(255 255 255 / 0.35); overflow: hidden; }
+.reel-progress > span > i { display: block; height: 100%; background: #fff; transform-origin: left; animation: 12s linear infinite; }
+.reel-progress > span:nth-child(1) > i { animation-name: seg0; }
+.reel-progress > span:nth-child(2) > i { animation-name: seg1; }
+.reel-progress > span:nth-child(3) > i { animation-name: seg2; }
+.reel-progress > span:nth-child(4) > i { animation-name: seg3; }
+@keyframes stamp-in {
+  0% { transform: rotate(-14deg) scale(1.4); opacity: 0; }
+  60% { transform: rotate(4deg) scale(0.96); opacity: 1; }
+  100% { transform: rotate(-4deg) scale(1); opacity: 1; }
+}
+.stamp-in {
+  animation: stamp-in 700ms cubic-bezier(0.2, 0.9, 0.2, 1.2) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reel-track,
+  .reel-progress > span > i,
+  .stamp-in {
+    animation: none !important;
+  }
+  *, *::before, *::after {
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+.no-select {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.sr-only-focusable:not(:focus) {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}

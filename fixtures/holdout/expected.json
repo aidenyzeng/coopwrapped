@@ -1,0 +1,6 @@
+{
+  "h1-notion-export.csv": { "mapping": { "Name": "company", "Tags": "null|notes|role", "Created": "appliedDate", "Stage": "status", "Salary": "null|notes", "URL": "null|notes" }, "notes": "Notion-style export: 'Name' is the company" },
+  "h2-excel-response-col.tsv": { "mapping": { "Applied": "appliedDate", "Employer": "company", "Posting": "role", "Response?": "null|notes", "Status Update": "status" }, "notes": "Date first; free-text status updates" },
+  "h3-minimal.csv": { "mapping": { "company": "company", "date": "appliedDate", "result": "status" }, "notes": "Lowercase headers, dd/mm dates" },
+  "h4-numbers-paste.tsv": { "mapping": { "#": "null", "Firm Name": "company", "Job": "role", "Sent": "appliedDate", "Heard back": "null|notes", "Interview": "interviewFlag", "Offer": "offerFlag" }, "notes": "Row-number column, response/interview/offer flags" }
+}

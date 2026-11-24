@@ -1,0 +1,105 @@
+{
+  "01-messy-headers.tsv": {
+    "mapping": {
+      "Company Name": "company",
+      "Position Title": "role",
+      "Current Status 🙃": "status",
+      "Date Applied (mm/dd)": "appliedDate",
+      "Interview?": "interviewFlag",
+      "Notes": "notes",
+      "Link": "notes|null"
+    },
+    "notes": "Sheets paste with a title row, padded/emoji headers and junk columns"
+  },
+  "02-missing-dates.csv": {
+    "mapping": {
+      "Company": "company",
+      "Role": "role",
+      "Date": "appliedDate",
+      "Status": "status"
+    },
+    "notes": "~45% blank or unreadable dates"
+  },
+  "03-ambiguous-statuses.csv": {
+    "mapping": {
+      "Employer": "company",
+      "Job Title": "role",
+      "Applied On": "appliedDate",
+      "Outcome": "status"
+    },
+    "notes": "Free-text and ambiguous statuses"
+  },
+  "04-duplicates.csv": {
+    "mapping": {
+      "company": "company",
+      "role": "role",
+      "applied": "appliedDate",
+      "status": "status"
+    },
+    "notes": "3 exact duplicates, spelling variants, similar-but-distinct names"
+  },
+  "05-tiny.csv": {
+    "mapping": {
+      "Company": "company",
+      "Status": "status"
+    },
+    "notes": "4 rows, no dates or roles"
+  },
+  "06-large-300.csv": {
+    "mapping": {
+      "Company": "company",
+      "Position": "role",
+      "Date Applied": "appliedDate",
+      "Status": "status",
+      "Interview Date": "interviewDate"
+    },
+    "notes": "300 rows with interview dates"
+  },
+  "07-zero-offers.csv": {
+    "mapping": {
+      "Company": "company",
+      "Role": "role",
+      "Date Applied": "appliedDate",
+      "Status": "status"
+    },
+    "notes": "No offers recorded"
+  },
+  "08-mostly-unanswered.csv": {
+    "mapping": {
+      "Company": "company",
+      "Role": "role",
+      "Applied": "appliedDate",
+      "Status": "status"
+    },
+    "notes": "~85% no recorded response; several recent"
+  },
+  "09-no-header-dmy.tsv": {
+    "mapping": {
+      "Column A": "company",
+      "Column B": "appliedDate",
+      "Column C": "status",
+      "Column D": "role"
+    },
+    "notes": "No header row; dd/mm/yyyy dates"
+  },
+  "10-milestones.tsv": {
+    "mapping": {
+      "Organization": "company",
+      "Role": "role",
+      "Applied": "appliedDate",
+      "Stage": "status",
+      "Interviewed?": "interviewFlag",
+      "Offer?": "offerFlag",
+      "Accepted?": "acceptedFlag"
+    },
+    "notes": "Milestone columns with check marks"
+  },
+  "11-semicolon-monthnames.csv": {
+    "mapping": {
+      "Result": "status",
+      "Firm": "company",
+      "When": "appliedDate"
+    },
+    "notes": "Semicolon delimited, status first, dates without a year"
+  }
+}

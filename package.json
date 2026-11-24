@@ -1,0 +1,42 @@
+{
+  "name": "coop-wrapped",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:e2e": "playwright test",
+    "eval:import": "tsx scripts/eval-import.ts && tsx scripts/eval-import.ts --holdout",
+    "fixtures": "tsx scripts/gen-fixtures.ts",
+    "samples": "tsx scripts/render-samples.ts",
+    "capture": "tsx scripts/capture.ts"
+  },
+  "dependencies": {
+    "@napi-rs/canvas": "^1.2.0",
+    "motion": "^14.14.0",
+    "next": "16.4.6",
+    "papaparse": "^5.7.1",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "server-only": "^0.0.1"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.65.1",
+    "@tailwindcss/turbopack": "4.3.3",
+    "@types/node": "^24.19.2",
+    "@types/papaparse": "^5.5.2",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.4.6",
+    "lighthouse": "^13.6.0",
+    "tailwindcss": "4.3.3",
+    "tsx": "^4.23.15",
+    "typescript": "^5",
+    "vitest": "^5.1.1"
+  }
+}
