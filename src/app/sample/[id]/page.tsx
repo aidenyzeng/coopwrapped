@@ -11,7 +11,7 @@ export const dynamicParams = false;
 export async function generateMetadata(props: PageProps<"/sample/[id]">): Promise<Metadata> {
   const { id } = await props.params;
   const s = SAMPLES[id as SampleId];
-  return { title: s ? `Sample: ${s.label} — Co-op Wrapped` : "Co-op Wrapped" };
+  return { title: s ? `Sample: ${s.label} — Co-wrapped` : "Co-wrapped" };
 }
 
 export default async function Page(props: PageProps<"/sample/[id]">) {

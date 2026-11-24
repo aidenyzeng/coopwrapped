@@ -1,6 +1,6 @@
-# Co-op Wrapped — technical write-up
+# Co-wrapped — technical write-up
 
-Co-op Wrapped turns a student's job-application spreadsheet into a 5–8 slide animated story and a shareable card. This document describes how the importer, analytics, story engine and sharing work, which privacy decisions shaped them, and what was measured. All numbers come from the commands named next to them; nothing is estimated.
+Co-wrapped turns a student's job-application spreadsheet into a 5–8 slide animated story and a shareable card. This document describes how the importer, analytics, story engine and sharing work, which privacy decisions shaped them, and what was measured. All numbers come from the commands named next to them; nothing is estimated.
 
 ## 1. Importer
 

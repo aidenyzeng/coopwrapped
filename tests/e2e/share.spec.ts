@@ -18,7 +18,7 @@ test("share link: exact public preview → create → sanitized replay + OG → 
   expect(html).toContain(`/api/og/${id}`);
   expect(html).toMatch(/<meta property="og:title" content="64 applications/);
   // nothing from the spreadsheet leaks into the public page
-  for (const name of ["Northwind", "Maple Byte", "Kestrel", "Co-op", "Intern"]) expect(html.replace(/Co-op Wrapped|co-op search|Co-op season|co-op/gi, "")).not.toContain(name);
+  for (const name of ["Northwind", "Maple Byte", "Kestrel", "Co-op", "Intern"]) expect(html.replace(/Co-wrapped|co-op search|Co-op season|co-op/gi, "")).not.toContain(name);
 
   const og = await request.get(`/api/og/${id}`);
   expect(og.headers()["content-type"]).toBe("image/png");

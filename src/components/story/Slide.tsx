@@ -1,7 +1,7 @@
 "use client";
 
 import { animate, motion } from "motion/react";
-import { useEffect, useRef, type ReactNode } from "react";
+import { memo, useEffect, useRef, type ReactNode } from "react";
 import type { SlideSpec } from "@/lib/story/plan";
 import { THEMES } from "@/lib/design/tokens";
 import { Postmark, Stamp } from "../Stamp";
@@ -44,7 +44,8 @@ function Reveal({ children, delay, still, className, fade = true }: { children: 
 }
 
 /** Renders one planned slide. `children` is used by summary/cta slides for their controls. */
-export function Slide({ spec, still, children }: { spec: SlideSpec; still: boolean; children?: ReactNode }) {
+/** Memoized: playback ticks re-render the player, but never the slide's animations. */
+export const Slide = memo(function Slide({ spec, still, children }: { spec: SlideSpec; still: boolean; children?: ReactNode }) {
   const theme = THEMES[spec.theme];
   const c = spec.content;
   const viz = c.viz;
@@ -143,6 +144,16 @@ export function Slide({ spec, still, children }: { spec: SlideSpec; still: boole
                 <Postmark seed={spec.seed} color={theme.fg} className="w-full" />
               </motion.div>
             ) : null}
+            {viz?.kind === "seal" ? (
+              <motion.div
+                className="ml-auto mr-[2cqw] w-[46cqw]"
+                initial={still ? false : { opacity: 0, scale: 1.4, rotate: 12 }}
+                animate={{ opacity: 1, scale: 1, rotate: 0 }}
+                transition={{ delay: 0.7, duration: 0.6, ease: [0.2, 0.9, 0.2, 1.25] }}
+              >
+                <Stamp persona={viz.persona} seed={spec.seed} tone={spec.theme} hole={theme.bg} className="w-full" />
+              </motion.div>
+            ) : null}
             {viz?.kind === "burst" ? (
               <div className="relative mx-auto mb-[14cqw] w-[44cqw]">
                 <Burst theme={theme} still={still} />
@@ -162,4 +173,4 @@ export function Slide({ spec, still, children }: { spec: SlideSpec; still: boole
       )}
     </div>
   );
-}
+});

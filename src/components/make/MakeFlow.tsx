@@ -203,7 +203,7 @@ export function MakeFlow() {
               <p className="text-sm font-bold">No spreadsheet handy? Try a sample:</p>
               <div className="mt-3 flex flex-wrap gap-2">
                 {SAMPLE_IDS.map((id) => (
-                  <Link key={id} href={`/sample/${id}?via=make`} className="rounded-full border border-black/15 px-3.5 py-2 text-[14px] font-semibold hover:bg-ink hover:text-white">
+                  <Link key={id} href={`/sample/${id}?via=make`} className="press rounded-full border border-black/15 px-3.5 py-2 text-[14px] font-semibold hover:bg-ink hover:text-white">
                     {SAMPLES[id].label} <span className="font-normal opacity-75">· {SAMPLES[id].blurb}</span>
                   </Link>
                 ))}

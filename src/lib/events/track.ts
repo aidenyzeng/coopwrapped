@@ -19,7 +19,7 @@ export interface EventProps {
   import_failed: { source: "paste" | "file"; reason: "empty" | "no_company" | "too_large" | "parse_error" };
   story_completed: { slides: number; mode: "own" | "sample" | "replay" };
   export: { style: "achievement" | "comedy" | "minimal" | "slide"; size: "story" | "landscape" };
-  share_action: { method: "web_share" | "download" | "copy_caption" | "copy_link"; style?: "achievement" | "comedy" | "minimal" | "slide" };
+  share_action: { method: "web_share" | "download" | "copy_caption" | "copy_link" | "x_intent" | "linkedin_intent"; style?: "achievement" | "comedy" | "minimal" | "slide" };
   share_link_created: { stats: number };
   share_link_deleted: Record<string, never>;
   replay_visit: { referred: boolean };
@@ -35,7 +35,7 @@ const ALLOWED: { [K in EventName]: Record<string, readonly (string | boolean)[] 
   import_failed: { source: ["paste", "file"], reason: ["empty", "no_company", "too_large", "parse_error"] },
   story_completed: { slides: "int", mode: ["own", "sample", "replay"] },
   export: { style: ["achievement", "comedy", "minimal", "slide"], size: ["story", "landscape"] },
-  share_action: { method: ["web_share", "download", "copy_caption", "copy_link"], style: ["achievement", "comedy", "minimal", "slide"] },
+  share_action: { method: ["web_share", "download", "copy_caption", "copy_link", "x_intent", "linkedin_intent"], style: ["achievement", "comedy", "minimal", "slide"] },
   share_link_created: { stats: "int" },
   share_link_deleted: {},
   replay_visit: { referred: [true, false] },

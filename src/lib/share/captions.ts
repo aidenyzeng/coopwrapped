@@ -33,6 +33,6 @@ export function captionSuggestions(s: PublicSummaryV1, url: string): Record<Capt
       : `Co-op season recap: ${s.total} applications, mass-produced cover letters, unwavering optimism.`,
   ];
 
-  const withUrl = (t: string) => `${t}\n\nMade with Co-op Wrapped → ${url}`;
+  const withUrl = (t: string) => `${t}\n\nMade with Co-wrapped → ${url}`;
   return { professional: professional.map(withUrl), playful: playful.map(withUrl) };
 }

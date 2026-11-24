@@ -1,4 +1,4 @@
-# Co-op Wrapped
+# Co-wrapped
 
 Turn a co-op / internship application spreadsheet into a short, personalized, animated story — and a card worth posting on LinkedIn or X.
 
@@ -32,7 +32,7 @@ Copy `.env.example` to `.env.local`.
 
 | Variable | Needed for | Notes |
 |---|---|---|
-| `NEXT_PUBLIC_SITE_URL` | Launch | Printed on every card and used for absolute OG URLs. The default, `coopwrapped.app`, is a **placeholder** — no domain has been registered. |
+| `NEXT_PUBLIC_SITE_URL` | Launch | Printed on every card and used for absolute OG URLs. The default, `cowrapped.app`, is a **placeholder** — no domain has been registered. |
 | `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` | Share links on serverless hosts | Without them, links are written to `.data/shares/*.json`, which only works on a writable disk (local dev, a VM). On Vercel, share-link creation returns 503 until these are set. |
 | `NEXT_PUBLIC_ANALYTICS_ENDPOINT` | Optional | A collector that accepts the allowlisted JSON events via `sendBeacon`. Unset → development adapter (in memory, console in dev). |
 
@@ -70,13 +70,19 @@ src/app/                  /, /make, /sample/[id], /r/[id], /how-it-works, /api/s
 
 Data flow: `text → parseTable → detectColumns → buildApplications (+issues) → computeMetrics → selectPersona → planStory → StoryPlayer`. The share card is always rendered from `PublicSummaryV1` — the same object a share link would store — so the preview is exactly what can become public.
 
+### Inspiration from recent launches
+
+- **Allo** (Josh Puckett, OFL): announced on X on 16 Nov 2026 ([post](https://x.com/joshpuckett/status/2122329345670988258): ~587K views, ~9.3K likes when checked on 24 Nov); GitHub repo created 15 Nov, ~1.5k stars in nine days. It is also the face portfolios.here serves (`/fonts/AlloVariable.woff2`). Used for the wordmark and site chrome, with the same blur + alpha-threshold "ink" filter technique.
+- **GoogleChrome/modern-web-guidance**: Chrome for Developers on X, 12 Nov 2026 — "#1 trending repo on GitHub" 48 h after 1.0 ([post](https://x.com/ChromiumDev/status/2121014221563396156): ~394K views, ~3.7K likes); Show HN 449 points; 25.8k stars. followed its guides for top-layer entry/exit animations (`@starting-style`, `transition-behavior: allow-discrete`, `overlay`) on the share sheet, light-dismiss via `closedby="any"`, `overscroll-behavior: contain` under the modal, and View Transitions — the landing page's front card morphs into the story frame via React `<ViewTransition>` (see Next's view-transitions guide).
+- **Share-everywhere distribution** (GitCity's one-click share-to-X, per an Indie Hackers write-up): "Post on X" / "Share on LinkedIn" in the share sheet.
+
 ### Key decisions and tradeoffs
 
 - **Canvas renderer shared by browser and server** instead of DOM screenshots (html-to-image) or a separate Satori layout. Exports are pixel-exact at the target size, fonts are guaranteed loaded (`document.fonts.load` before drawing), and OG images can't drift from exports. Cost: card layouts are imperative canvas code, and the OG route needs a native module (Node runtime only).
 - **Fonts are self-hosted** (Bricolage Grotesque variable woff2 for the web; static TTFs for the server). They're registered under their real family names because Skia collapses several weights registered under one alias.
 - **Share links store a summary, not a token in the URL.** Server-side social previews need server-side data (URL fragments never reach the server), and storage enables deletion. The stored summary is integers + enums only — no strings from the spreadsheet can be stored even by a modified client.
 - **No accounts, no database.** A key-value store is the only infrastructure, used only for opt-in links.
-- **Landing page is a single screen** (no scroll at 360×640 → 1920×1080; checked by `scripts/check-landing-fit.ts`). It is deliberately minimal: a wordmark that blurs into focus, a one-line value proposition, and a slowly turning CSS-3D ring of real sample cards (3 personas × 3 styles, rendered by `scripts/render-samples.ts`). The ring can be dragged/swiped, pauses on hover, is still under reduced motion, and its caption names the front card; clicking the front card plays that sample. No WebGL and no images beyond the 14–27 KB card thumbnails.
+- **Landing page is a single screen** (no scroll at 360×640 → 1920×1080; checked by `scripts/check-landing-fit.ts`). Wordmark "co-wrapped" is set in [Allo](https://allo.joshpuckett.me) by Josh Puckett (SIL OFL 1.1; licence in `public/fonts/ALLO-OFL.txt`), instanced to a 63 KB subset (opsz 32, wght 250–650, ROND 40–100). Each letter's weight and roundness ripple in a wave on load and swell toward the pointer; a blur + alpha-threshold SVG filter gives the soft "ink" edge. Below it, a CSS-3D ring of real sample cards whose geometry is pure CSS (container-query units), so it paints from server HTML before hydration; idle rotation is a compositor-driven Web Animation, and JS only runs while dragging or picking a card. Hovering the ring slows it to a quarter speed (it never stops); cards grow slightly on hover; buttons grow on hover and squish on press. The wordmark's gradient fill follows the front card's colours, as on portfolios.here. The app icon (`src/app/icon.svg`) is a gift-wrapped envelope gasping at its own bow.
 - **Exact duplicates are counted once by default** (with a visible warning and a toggle); near-duplicates are only flagged, because re-applying to the same company is normal.
 
 ## Metric semantics
@@ -97,6 +103,15 @@ All measurements taken on 2026-11-24 on a local production build (`next start`),
 
 **Tests:** 111 unit tests (vitest) and 23 end-to-end tests (Playwright; desktop + Pixel 7 emulation; 2 tests are intentionally desktop- or mobile-only, so 23 passed and 3 skipped in the full matrix) — all passing.
 
+**Smoothness** (`scripts/measure-smoothness.ts`: 6 s window after the intro, 4× CPU throttling, mobile viewport; main-thread time from Chrome's performance counters, compared against the previous commit built side by side):
+
+| Page | Before | After | Why |
+|---|---|---|---|
+| Story (`/sample/marathoner`) | 3,588 ms (script 2,387) | 1,210 ms (script 285) | Progress bar written to the DOM per frame; the state machine ticks every ~120 ms instead of every frame; `Slide` memoized |
+| Landing (`/`) | 3,670 ms (style 3,112) | 1,608 ms (style 900) | Ring rotation moved to a compositor Web Animation; no per-frame React updates |
+
+Frame rate was ~60 fps in both builds in headless Chrome, so the gain shows up as CPU headroom (battery, older phones) rather than fps here.
+
 **Import accuracy** (column-level, against hand-labeled mappings — `docs/import-eval*.md`):
 
 | Set | First run | After fixes |
@@ -112,21 +127,21 @@ The held-out first run is the most honest number. After it was recorded, the two
 
 | Page | Perf runs | Perf | A11y | Best practices | SEO | LCP | TBT | CLS | JS transferred |
 |---|---|---|---|---|---|---|---|---|---|
-| `/` (minimal ring redesign) | 100, 100, 100 | 100 | 100 | 100 | 100 | 0.8 s | 10 ms | 0.001 | — |
+| `/` (co-wrapped landing) | 95, 95, 95 | 95 | 100 | 100 | 100 | 3.0 s | — | 0.001 | — |
 | `/sample/marathoner` (story) | 100, 100, 100 | 100 | 100 | 100 | 100 | 0.8 s | 10 ms | 0 | 239 KB |
 | `/make` | 100, 100, 100 | 100 | 100 | 100 | 100 | 0.8 s | 10 ms | 0 | 245 KB |
 | `/r/[id]` (replay) | 100, 100, 100 | 100 | 100 | 100 | 60 | 0.6 s | 10 ms | 0 | 218 KB |
 
-Replay SEO is 60 because shared recaps are intentionally `noindex`. The landing row was re-measured after the minimal ring redesign; the other rows are from the earlier measurement. Localhost has no real network latency even under simulated throttling; re-measure after deploying.
+Replay SEO is 60 because shared recaps are intentionally `noindex`. The landing row was re-measured after the co-wrapped redesign; its LCP is now a carousel card image rather than text. Other rows are from the earlier measurement (re-checked after the redesign: `/make` 100, `/how-it-works` 100, story 99). Localhost has no real network latency even under simulated throttling; re-measure after deploying.
 
 ## Known limitations
 
-- Not deployed; the card URL `coopwrapped.app` is a placeholder.
+- Not deployed; the card URL `cowrapped.app` is a placeholder.
 - Share-link deletion uses a token kept in the creator's `localStorage`. Clearing site data or switching devices means the link can't be deleted until it expires (1 year).
 - The file-backed share store and its rate limiter are per-process; use Upstash in production.
 - `.xlsx` / `.numbers` files aren't parsed — users paste cells or export CSV (the UI says so).
 - Status vocabulary and copy are English-only. Two-digit years are assumed to be 20xx.
 - Visual QA and E2E ran in Chrome only (desktop + Android emulation). Safari/Firefox, and the native share sheet on real phones, are untested.
-- Web Share with files isn't available in every browser; those users get a download instead.
+- Web Share with files isn't available in every browser; those users get a download instead. "Post on X" / "Share on LinkedIn" open the network's composer with the caption, but intents can't attach images, so the card is downloaded for the user to attach.
 - With reduced motion, animations are removed but slides still auto-advance (pause is always available).
 - Fixtures and held-out files are synthetic; real trackers will surface new header and status wording.

@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- co-wrapped: a gift-wrapped envelope, glancing up at its own bow -->
+  <rect width="64" height="64" rx="15" fill="#FF5A36"/>
+  <!-- envelope -->
+  <rect x="9" y="22" width="46" height="32" rx="5" fill="#F4EEE3" stroke="#121116" stroke-width="3"/>
+  <path d="M11 24.5 Q32 33.5 53 24.5" fill="none" stroke="#121116" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  <!-- ribbon -->
+  <rect x="28.5" y="22" width="7" height="32" fill="#3240F0"/>
+  <path d="M28.5 22 V54 M35.5 22 V54" stroke="#121116" stroke-width="2"/>
+  <!-- bow -->
+  <path d="M32 21 C26 12 17 13 18.5 19.5 C19.8 24.5 27 23.5 32 21 Z" fill="#3240F0" stroke="#121116" stroke-width="2.6" stroke-linejoin="round"/>
+  <path d="M32 21 C38 12 47 13 45.5 19.5 C44.2 24.5 37 23.5 32 21 Z" fill="#3240F0" stroke="#121116" stroke-width="2.6" stroke-linejoin="round"/>
+  <circle cx="32" cy="21" r="3.6" fill="#3240F0" stroke="#121116" stroke-width="2.6"/>
+  <!-- googly eyes looking up at the bow -->
+  <circle cx="19" cy="40.5" r="6.4" fill="#fff" stroke="#121116" stroke-width="2.4"/>
+  <circle cx="45" cy="40.5" r="6.4" fill="#fff" stroke="#121116" stroke-width="2.4"/>
+  <circle cx="20.8" cy="37.6" r="3" fill="#121116"/>
+  <circle cx="43.4" cy="37.4" r="3" fill="#121116"/>
+  <!-- surprised 'o' mouth, drawn over the ribbon -->
+  <ellipse cx="32" cy="47.6" rx="4.2" ry="4.6" fill="#121116"/>
+  <ellipse cx="32" cy="49.4" rx="2.3" ry="1.7" fill="#FFB0D5"/>
+</svg>

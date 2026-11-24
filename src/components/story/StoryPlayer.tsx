@@ -2,7 +2,7 @@
 
 import { useReducedMotion } from "motion/react";
 import Link from "next/link";
-import { useCallback, useEffect, useReducer, useRef, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useReducer, useRef, useState, ViewTransition, type ReactNode } from "react";
 import { initPlayback, isPlaying, playbackReducer, slideProgress } from "@/lib/playback/machine";
 import type { StoryPlan } from "@/lib/story/plan";
 import { THEMES, siteHost } from "@/lib/design/tokens";
@@ -40,18 +40,33 @@ export function StoryPlayer({ plan, mode, renderEnd, dialogOpen, closeHref = "/"
     completedRef.current = false;
   }, [planKey]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Clock: rAF while playing. Large gaps (background throttling) are clamped by the machine.
+  // Clock: rAF while playing. The active progress bar is written straight to the DOM
+  // every frame; the state machine only receives a TICK every ~120 ms (or at the slide
+  // boundary), so React re-renders ~8×/s instead of 60×/s. Gaps are clamped (≤250 ms).
   const playing = isPlaying(state);
+  const stateRef = useRef(state);
+  const activeBar = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    stateRef.current = state;
+  });
   useEffect(() => {
     if (!playing) return;
     let last = performance.now();
+    let pending = 0;
     let raf = requestAnimationFrame(function frame(now) {
-      dispatch({ type: "TICK", ms: now - last });
+      pending += Math.min(250, now - last);
       last = now;
+      const s = stateRef.current;
+      const d = s.durations[s.index];
+      if (activeBar.current) activeBar.current.style.transform = `scaleX(${Math.min(1, (s.elapsed + pending) / d)})`;
+      if (pending >= 120 || s.elapsed + pending >= d) {
+        dispatch({ type: "TICK", ms: Math.min(250, pending) });
+        pending = 0;
+      }
       raf = requestAnimationFrame(frame);
     });
     return () => cancelAnimationFrame(raf);
-  }, [playing]);
+  }, [playing, state.index, state.visit]);
 
   // Environmental pauses
   useEffect(() => {
@@ -128,7 +143,7 @@ export function StoryPlayer({ plan, mode, renderEnd, dialogOpen, closeHref = "/"
     setExporting(true);
     try {
       const blob = await renderSlideBlob(spec, siteHost());
-      const res = await shareOrDownload(blob, `coop-wrapped-${spec.id}.png`);
+      const res = await shareOrDownload(blob, `co-wrapped-${spec.id}.png`);
       track("export", { style: "slide", size: "story" });
       if (res !== "cancelled") track("share_action", { method: res, style: "slide" });
     } finally {
@@ -143,6 +158,8 @@ export function StoryPlayer({ plan, mode, renderEnd, dialogOpen, closeHref = "/"
 
   return (
     <div className="fixed inset-0 z-10 flex items-center justify-center bg-ink">
+      {/* same name as the landing page's front card: the card morphs into this frame */}
+      <ViewTransition name="story-frame" share="morph" default="none">
       <section
         aria-roledescription="story"
         aria-label="Your co-op recap"
@@ -168,7 +185,8 @@ export function StoryPlayer({ plan, mode, renderEnd, dialogOpen, closeHref = "/"
           {plan.slides.map((s, i) => (
             <div key={s.id} className="h-[3px] flex-1 overflow-hidden rounded-full" style={{ background: `color-mix(in srgb, ${theme.fg} 28%, transparent)` }}>
               <div
-                className="h-full origin-left rounded-full"
+                ref={i === state.index ? activeBar : undefined}
+                className="h-full origin-left rounded-full will-change-transform"
                 style={{
                   background: theme.fg,
                   transform: `scaleX(${i < state.index ? 1 : i > state.index ? 0 : slideProgress(state)})`,
@@ -181,7 +199,7 @@ export function StoryPlayer({ plan, mode, renderEnd, dialogOpen, closeHref = "/"
         {/* controls */}
         <div className="absolute inset-x-0 top-5 flex items-center justify-between px-3">
           <span className="text-sm font-bold tracking-tight" style={{ color: theme.fg }}>
-            Co-op Wrapped
+            Co-wrapped
           </span>
           <div className="flex items-center gap-1.5">
             <button type="button" className={iconBtn} style={iconStyle} onClick={exportSlide} aria-label="Export this slide as an image" title="Export slide">
@@ -240,6 +258,7 @@ export function StoryPlayer({ plan, mode, renderEnd, dialogOpen, closeHref = "/"
           {userPaused ? " Paused." : ""}
         </p>
       </section>
+      </ViewTransition>
 
       {/* desktop side arrows */}
       <button

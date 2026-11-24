@@ -3,8 +3,8 @@ import type { Metadata } from "next";
 import { PERSONAS } from "@/lib/persona/personas";
 
 export const metadata: Metadata = {
-  title: "How it works — Co-op Wrapped",
-  description: "How Co-op Wrapped reads your spreadsheet, calculates each number, picks your persona, and what (if anything) leaves your browser.",
+  title: "How it works — Co-wrapped",
+  description: "How Co-wrapped reads your spreadsheet, calculates each number, picks your persona, and what (if anything) leaves your browser.",
 };
 
 function H2({ children, id }: { children: React.ReactNode; id: string }) {
@@ -26,7 +26,7 @@ export default function Page() {
           How it works
         </h1>
         <p className="mt-5 text-lg leading-relaxed">
-          Co-op Wrapped turns an application tracker into a short story. Here’s exactly what it does with your data and how every number is calculated.
+          Co-wrapped turns an application tracker into a short story. Here’s exactly what it does with your data and how every number is calculated.
         </p>
 
         <H2 id="privacy">Privacy</H2>

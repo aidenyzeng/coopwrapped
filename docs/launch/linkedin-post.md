@@ -8,7 +8,7 @@ Co-op season produces a lot of spreadsheets.
 
 Rows of companies, roles, dates, and a status column that slowly fills with "Rejected", "In review", and the occasional "Interview!!". By the end it's a pretty good record of how much work a search takes — and almost nobody ever sees it.
 
-So I built **Co-op Wrapped**: paste your application tracker and it turns into a short, animated recap of your season — your volume, your busiest week, where things stand, and a search persona — plus a card you can share.
+So I built **Co-wrapped**: paste your application tracker and it turns into a short, animated recap of your season — your volume, your busiest week, where things stand, and a search persona — plus a card you can share.
 
 A few things I cared about:
 

@@ -53,7 +53,7 @@ export function StoryExperience({ metrics, persona, seed, topCompany, mode, onCl
             <button
               type="button"
               onClick={() => setSheet("card")}
-              className="flex min-h-0 flex-1 items-center justify-center"
+              className="press flex min-h-0 flex-1 items-center justify-center"
               aria-label="Open share options for your card"
             >
               <CardCanvas

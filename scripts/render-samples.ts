@@ -25,15 +25,21 @@ for (const id of SAMPLE_IDS) {
       fs.writeFileSync(path.join(root, `docs/exports/${id}-${style}-${size}.png`), renderCardPng(card, size));
     }
   }
-  // landing carousel: every style, landscape, WebP at 720×378
+  // landing carousel: every style, landscape, WebP at 1080×567 (sharp on 2× screens)
   for (const style of CARD_STYLES) {
     const card = cardFromSummary(sampleSummary(id, style));
     renderCardPng(card, "landscape"); // registers fonts
-    const c = createCanvas(720, 378);
+    const c = createCanvas(1080, 567);
     const ctx = c.getContext("2d") as unknown as Ctx;
-    (ctx as unknown as { scale: (x: number, y: number) => void }).scale(720 / 1200, 378 / 630);
+    (ctx as unknown as { scale: (x: number, y: number) => void }).scale(1080 / 1200, 567 / 630);
     drawCard(ctx, card, "landscape", Path2D as unknown as Path2DCtor);
-    fs.writeFileSync(path.join(root, `public/samples/${id}-${style}.webp`), c.toBuffer("image/webp", 86));
+    fs.writeFileSync(path.join(root, `public/samples/${id}-${style}.webp`), c.toBuffer("image/webp", 84));
+    // 720w variant for phones (srcset)
+    const c2 = createCanvas(720, 378);
+    const ctx2 = c2.getContext("2d") as unknown as Ctx;
+    (ctx2 as unknown as { scale: (x: number, y: number) => void }).scale(720 / 1200, 378 / 630);
+    drawCard(ctx2, card, "landscape", Path2D as unknown as Path2DCtor);
+    fs.writeFileSync(path.join(root, `public/samples/${id}-${style}-720.webp`), c2.toBuffer("image/webp", 82));
   }
   console.log(id, sampleSummary(id).persona, sampleSummary(id).total);
 }

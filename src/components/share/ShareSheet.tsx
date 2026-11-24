@@ -10,7 +10,7 @@ import { captionSuggestions, type CaptionTone } from "@/lib/share/captions";
 import type { CardSize } from "@/lib/card/render";
 import { track } from "@/lib/events/track";
 import { CardCanvas } from "./CardCanvas";
-import { canShareFiles, renderCardBlob, shareOrDownload } from "./exporters";
+import { canShareFiles, download, renderCardBlob, shareOrDownload } from "./exporters";
 
 export interface ShareState {
   style: CardStyle;
@@ -30,7 +30,7 @@ const STYLE_INFO: Record<CardStyle, { label: string; hint: string }> = {
 
 const noopSubscribe = () => () => {};
 
-const SITE = (process.env.NEXT_PUBLIC_SITE_URL || "https://coopwrapped.app").replace(/\/$/, "");
+const SITE = (process.env.NEXT_PUBLIC_SITE_URL || "https://cowrapped.app").replace(/\/$/, "");
 
 interface Props {
   open: boolean;
@@ -95,11 +95,38 @@ export function ShareSheet({ open, onClose, metrics, persona, seed, topCompany, 
     setNotice("");
     try {
       const blob = await renderCardBlob(card, size);
-      const res = await shareOrDownload(blob, `coop-wrapped-${state.style}-${size === "story" ? "1080x1920" : "1200x630"}.png`, caption);
+      const res = await shareOrDownload(blob, `co-wrapped-${state.style}-${size === "story" ? "1080x1920" : "1200x630"}.png`, caption);
       track("export", { style: state.style, size });
       if (res !== "cancelled") track("share_action", { method: res, style: state.style });
       setNotice(res === "download" ? "Saved the image. Attach it to your post." : res === "web_share" ? "Handed off to your share sheet." : "");
     } catch {
+      setNotice("Couldn’t create the image. Try again?");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  /**
+   * Save the card, then open the network's composer with the caption filled in.
+   * The window is opened synchronously so popup blockers allow it. Intents can't
+   * carry an image, so the user attaches the file that was just saved.
+   */
+  const postTo = async (net: "x" | "linkedin") => {
+    const w = window.open("about:blank", "_blank");
+    if (w) w.opener = null;
+    setBusy(true);
+    try {
+      const blob = await renderCardBlob(card, size);
+      download(blob, `co-wrapped-${state.style}-${size === "story" ? "1080x1920" : "1200x630"}.png`);
+      track("export", { style: state.style, size });
+      track("share_action", { method: net === "x" ? "x_intent" : "linkedin_intent", style: state.style });
+      const text = encodeURIComponent(caption);
+      const url = net === "x" ? `https://x.com/intent/post?text=${text}` : `https://www.linkedin.com/feed/?shareActive=true&text=${text}`;
+      if (w) w.location.href = url;
+      else window.open(url, "_blank", "noopener");
+      setNotice("Image saved. Attach it to your post — the caption is already filled in.");
+    } catch {
+      w?.close();
       setNotice("Couldn’t create the image. Try again?");
     } finally {
       setBusy(false);
@@ -154,7 +181,7 @@ export function ShareSheet({ open, onClose, metrics, persona, seed, topCompany, 
   const linkUrl = link ? `${window.location.origin}/r/${link.id}` : "";
   // Server render assumes no Web Share; the client value is read after hydration (no mismatch).
   const webShare = useSyncExternalStore(noopSubscribe, canShareFiles, () => false);
-  const seg = "rounded-full px-3.5 py-2 text-sm font-bold border-2 border-ink transition-colors";
+  const seg = "press rounded-full px-3.5 py-2 text-sm font-bold border-2 border-ink";
 
   return (
     <dialog
@@ -162,7 +189,9 @@ export function ShareSheet({ open, onClose, metrics, persona, seed, topCompany, 
       onClose={onClose}
       onCancel={onClose}
       aria-labelledby="share-title"
-      className="m-0 ml-auto h-dvh max-h-dvh w-full max-w-[560px] overflow-y-auto bg-paper p-0 text-ink backdrop:bg-ink/70 sm:my-0"
+      // light-dismiss: tapping the backdrop closes the sheet (native, no JS)
+      {...{ closedby: "any" }}
+      className="share-sheet m-0 ml-auto h-dvh max-h-dvh w-full max-w-[560px] overflow-y-auto bg-paper p-0 text-ink sm:my-0"
       data-testid="share-sheet"
     >
       <div className="sticky top-0 z-10 flex items-center justify-between border-b-2 border-ink bg-paper px-5 py-3">
@@ -225,7 +254,7 @@ export function ShareSheet({ open, onClose, metrics, persona, seed, topCompany, 
                   <li key={s.key}>
                     <label className={`flex min-h-11 cursor-pointer items-center gap-3 rounded-xl border-2 px-3 py-2 ${checked ? "border-ink bg-white/60" : "border-line"} ${disabled ? "opacity-50" : ""}`}>
                       <input type="checkbox" className="h-5 w-5 accent-[var(--ink)]" checked={checked} disabled={disabled} onChange={() => toggleStat(s.key)} />
-                      <span className="tabular w-16 text-lg font-extrabold">{d.value}</span>
+                      <span className="tabular min-w-12 text-lg font-extrabold">{d.value}</span>
                       <span className="text-sm">{d.label}</span>
                     </label>
                   </li>
@@ -236,7 +265,10 @@ export function ShareSheet({ open, onClose, metrics, persona, seed, topCompany, 
           {topCompany ? (
             <label className="mt-3 flex min-h-11 cursor-pointer items-center gap-3 text-sm">
               <input type="checkbox" className="h-5 w-5 accent-[var(--ink)]" checked={state.showCompany} onChange={(e) => setState({ ...state, showCompany: e.target.checked })} />
-              Show a company name on the image <span className="text-muted">(off by default · never included in share links)</span>
+              <span>
+                Show a company name on the image{" "}
+                <span className="text-muted">(off by default · never included in share links)</span>
+              </span>
             </label>
           ) : null}
         </fieldset>
@@ -252,9 +284,8 @@ export function ShareSheet({ open, onClose, metrics, persona, seed, topCompany, 
               className="btn btn-secondary"
               disabled={busy}
               onClick={async () => {
-                const { download } = await import("./exporters");
                 const blob = await renderCardBlob(card, size);
-                download(blob, `coop-wrapped-${state.style}-${size === "story" ? "1080x1920" : "1200x630"}.png`);
+                download(blob, `co-wrapped-${state.style}-${size === "story" ? "1080x1920" : "1200x630"}.png`);
                 track("export", { style: state.style, size });
                 track("share_action", { method: "download", style: state.style });
               }}
@@ -262,6 +293,17 @@ export function ShareSheet({ open, onClose, metrics, persona, seed, topCompany, 
               Download
             </button>
           ) : null}
+        </div>
+        {/* one-click posting: save the image, open the network's composer with the caption */}
+        <div className="-mt-3 flex flex-wrap gap-2" role="group" aria-label="Post directly">
+          <button type="button" className={`${seg} press flex items-center gap-2`} onClick={() => postTo("x")} disabled={busy} data-testid="post-x">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden><path d="M17.8 3h3.1l-6.8 7.7L22 21h-6.2l-4.9-6.4L5.3 21H2.2l7.3-8.3L2 3h6.4l4.4 5.8L17.8 3Zm-1.1 16.2h1.7L7.4 4.7H5.6l11.1 14.5Z" /></svg>
+            Post on X
+          </button>
+          <button type="button" className={`${seg} press flex items-center gap-2`} onClick={() => postTo("linkedin")} disabled={busy} data-testid="post-linkedin">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden><path d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5ZM3 9.75h4v11.25H3V9.75Zm6.5 0h3.8v1.6h.06c.53-1 1.83-2.05 3.77-2.05 4.03 0 4.77 2.65 4.77 6.1V21h-4v-4.95c0-1.18-.02-2.7-1.65-2.7-1.65 0-1.9 1.29-1.9 2.62V21h-4V9.75Z" /></svg>
+            Share on LinkedIn
+          </button>
         </div>
         <p className="text-sm text-muted" aria-live="polite" data-testid="share-notice">
           {notice}
@@ -280,7 +322,7 @@ export function ShareSheet({ open, onClose, metrics, persona, seed, topCompany, 
             </div>
           </div>
           <label htmlFor="caption" className="sr-only">Caption (editable)</label>
-          <textarea id="caption" value={caption} onChange={(e) => setCaption(e.target.value)} rows={6} className="w-full rounded-xl border-2 border-ink bg-white/70 p-3 text-[15px] leading-relaxed" />
+          <textarea id="caption" value={caption} onChange={(e) => setCaption(e.target.value)} rows={8} className="w-full rounded-xl border-2 border-ink bg-white/70 p-3 text-[15px] leading-relaxed" />
           <div className="mt-2 flex gap-2">
             <button type="button" className={seg} onClick={() => setCaptionIdx((i) => i + 1)}>Another idea</button>
             <button type="button" className={seg} onClick={() => copy(caption, "copy_caption")}>Copy caption</button>

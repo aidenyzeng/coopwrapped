@@ -44,11 +44,11 @@ export function onInk(tone: ThemeId): string {
 export const FONT_DISPLAY = "Bricolage Grotesque";
 export const FONT_SERIF = "Instrument Serif";
 
-export const PRODUCT_NAME = "Co-op Wrapped";
+export const PRODUCT_NAME = "Co-wrapped";
 
 /** Hostname printed on cards. Configure NEXT_PUBLIC_SITE_URL before launch. */
 export function siteHost(): string {
-  const url = process.env.NEXT_PUBLIC_SITE_URL || "https://coopwrapped.app";
+  const url = process.env.NEXT_PUBLIC_SITE_URL || "https://cowrapped.app";
   return url.replace(/^https?:\/\//, "").replace(/\/$/, "");
 }
 

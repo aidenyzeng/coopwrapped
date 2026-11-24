@@ -14,6 +14,7 @@ export type Viz =
   | { kind: "burst"; persona: PersonaId }
   | { kind: "ratio"; part: number; whole: number }
   | { kind: "postmark" }
+  | { kind: "seal"; persona: PersonaId }
   | { kind: "stats"; items: { value: string; label: string }[] };
 
 export interface SlideContent {
@@ -272,7 +273,7 @@ export function planStory(input: PlanInput): StoryPlan {
         eyebrow: "Still going",
         headline: "The search isn’t over.",
         body: `But ${fmt(m.total)} applications is proof you don’t quit. The right “yes” only needs to happen once.`,
-        viz: { kind: "postmark" },
+        viz: { kind: "seal", persona: persona.id },
       },
     });
   }

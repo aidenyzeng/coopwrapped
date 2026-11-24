@@ -321,6 +321,25 @@ function achievementLandscape(ctx: Ctx, env: Env, d: CardData, W: number, H: num
   }
 }
 
+
+/**
+ * Postmark next to the big number: beside it when there's room, otherwise
+ * behind it at low opacity so it never hurts the number's legibility.
+ */
+function postmarkNear(ctx: Ctx, env: Env, d: CardData, fg: string, numLeft: number, numW: number, base: number, ns: number, maxRight: number, desired: number) {
+  const start = numLeft + numW + ns * 0.08;
+  const room = maxRight - start;
+  ctx.save();
+  if (room >= desired * 0.45) {
+    const size = Math.min(desired, room);
+    drawShapes(ctx, env, postmark(d.seed, fg), start + size / 2, base - ns * 0.38, size, 0);
+  } else {
+    ctx.globalAlpha = 0.16;
+    drawShapes(ctx, env, postmark(d.seed, fg), numLeft + numW * 0.62, base - ns * 0.38, Math.min(desired, numW), 0);
+  }
+  ctx.restore();
+}
+
 const COMEDY_HEADLINE = "Times I said “I’m excited to apply”:";
 
 function receipt(ctx: Ctx, d: CardData, x: number, y: number, w: number, rowH: number, fs: number) {
@@ -404,10 +423,9 @@ function comedyStory(ctx: Ctx, env: Env, d: CardData, W: number, H: number) {
   hlLines.forEach((l, i) => text(ctx, l, M, y + hl.size * 0.8 + i * hl.size * 1.1, t.fg));
   y += hlLines.length * hl.size * 1.1 + 40 + gap;
   const base = y + ns * 0.72;
-  ctx.save();
-  ctx.globalAlpha = 0.9;
-  drawShapes(ctx, env, postmark(d.seed, t.fg), W * 0.62, base - ns * 0.42, 560, 0);
-  ctx.restore();
+  font(ctx, 800, ns);
+  tracking(ctx, -0.06, ns);
+  postmarkNear(ctx, env, d, t.fg, M - ns * 0.03, ctx.measureText(num).width, base, ns, W - M, 520);
   font(ctx, 800, ns);
   tracking(ctx, -0.06, ns);
   text(ctx, num, M - ns * 0.03, base, t.fg);
@@ -461,9 +479,9 @@ function comedyLandscape(ctx: Ctx, env: Env, d: CardData, W: number, H: number) 
   fit(ctx, COMEDY_HEADLINE, 400, leftW - M, 34, 22, 0, true);
   text(ctx, COMEDY_HEADLINE, M, hy, t.fg);
   const base = hy + hs * 0.3 + ns * 0.78;
-  ctx.save();
-  drawShapes(ctx, env, postmark(d.seed, t.fg), M + leftW * 0.55, base - ns * 0.4, 300, 0);
-  ctx.restore();
+  font(ctx, 800, ns);
+  tracking(ctx, -0.06, ns);
+  postmarkNear(ctx, env, d, t.fg, M - ns * 0.03, ctx.measureText(num).width, base, ns, leftW + 20, 300);
   font(ctx, 800, ns);
   tracking(ctx, -0.06, ns);
   text(ctx, num, M - ns * 0.03, base, t.fg);
