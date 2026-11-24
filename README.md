@@ -110,6 +110,10 @@ All measurements taken on 2026-11-24 on a local production build (`next start`),
 | Story (`/sample/marathoner`) | 3,588 ms (script 2,387) | 1,210 ms (script 285) | Progress bar written to the DOM per frame; the state machine ticks every ~120 ms instead of every frame; `Slide` memoized |
 | Landing (`/`) | 3,670 ms (style 3,112) | 1,608 ms (style 900) | Ring rotation moved to a compositor Web Animation; no per-frame React updates |
 
+**What a visitor sees first** (`scripts/measure-first-view.ts`: slow-4G network + 4× CPU, 3 runs, previous commit vs this build): the wordmark appears at 693–974 ms → 681–761 ms, and the front carousel card at **2,779–3,010 ms → 832–920 ms**. The previous build hid the ring until JavaScript had measured it; this one renders it from HTML.
+
+That is also why Lighthouse's *simulated* LCP rose (≈760 ms → ≈2,650 ms; performance 100 → 96–97): the old build's largest paint was the wordmark text, because the cards weren't visible yet. Real LCP is unchanged or better (92–120 ms → 69–111 ms).
+
 Frame rate was ~60 fps in both builds in headless Chrome, so the gain shows up as CPU headroom (battery, older phones) rather than fps here.
 
 **Import accuracy** (column-level, against hand-labeled mappings — `docs/import-eval*.md`):
