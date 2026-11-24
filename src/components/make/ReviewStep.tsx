@@ -60,9 +60,9 @@ export function ReviewStep({
     <section aria-labelledby="review-title" className="pt-4">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="text-xs font-bold uppercase tracking-[0.14em]">Quick check</p>
-          <h1 id="review-title" className="mt-1 text-[clamp(2rem,6vw,3.4rem)] font-extrabold leading-[0.95] tracking-[-0.035em]">
-            {count} {count === 1 ? "application" : "applications"} <span className="font-serif-i font-normal">found.</span>
+          <p className="font-mono text-xs font-bold uppercase tracking-[0.14em]">Quick check</p>
+          <h1 id="review-title" className="font-pixel mt-1 text-[clamp(2rem,6vw,3.4rem)] leading-[1]">
+            {count} {count === 1 ? "application" : "applications"} found
           </h1>
           <p className="mt-2 text-muted">
             From {rows.length} {rows.length === 1 ? "row" : "rows"}
@@ -71,23 +71,23 @@ export function ReviewStep({
           </p>
         </div>
         <div className="flex gap-3">
-          <button type="button" className="btn btn-secondary" onClick={onBack}>
+          <button type="button" className="mbtn mbtn-ghost" onClick={onBack}>
             Back
           </button>
-          <button type="button" className="btn btn-accent" onClick={onPlay} disabled={!hasCompany || count === 0 || busy} data-testid="play-story">
+          <button type="button" className="mbtn mbtn-blue" onClick={onPlay} disabled={!hasCompany || count === 0 || busy} data-testid="play-story">
             Play my story →
           </button>
         </div>
       </div>
 
       {!hasCompany ? (
-        <p role="alert" className="mt-5 rounded-xl border-2 border-tomato bg-tomato/10 p-3 font-semibold">
+        <p role="alert" className="mt-5 rounded-xl border border-tomato bg-tomato/10 p-3 font-semibold">
           Pick which column holds the company name — it’s the one column we need.
         </p>
       ) : null}
 
       <h2 className="mt-10 text-xl font-extrabold">Columns</h2>
-      <ul className="mt-3 divide-y divide-line rounded-2xl border-2 border-ink bg-white/60">
+      <ul className="mt-3 divide-y divide-line rounded-2xl border border-black/10 bg-white">
         {headers.map((h, c) => {
           const conf = confidenceLabel(mapping.confidence[c]);
           const examples = rows
@@ -106,7 +106,7 @@ export function ReviewStep({
                   id={`map-${c}`}
                   value={mapping.byColumn[c] ?? ""}
                   onChange={(e) => setField(c, (e.target.value || null) as FieldKey | null)}
-                  className="min-h-11 flex-1 rounded-lg border-2 border-ink bg-paper px-2 font-semibold sm:w-48 sm:flex-none"
+                  className="min-h-11 flex-1 rounded-lg border border-black/15 bg-white px-2 font-semibold sm:w-48 sm:flex-none"
                   data-testid={`map-${c}`}
                 >
                   <option value="">Not used</option>
@@ -117,7 +117,7 @@ export function ReviewStep({
                   ))}
                 </select>
                 {conf.text && !corrections.byColumn ? (
-                  <span className={`w-14 rounded-full px-2 py-0.5 text-center text-xs font-bold ${conf.cls}`} title={mapping.reasons[c]}>
+                  <span className={`w-14 rounded-[2px] px-2 py-0.5 text-center font-mono text-[11px] font-bold ${conf.cls}`} title={mapping.reasons[c]}>
                     {conf.text}
                   </span>
                 ) : null}
@@ -145,13 +145,13 @@ export function ReviewStep({
             id="datefmt"
             value={mapping.dateFormat}
             onChange={(e) => onChange({ ...corrections, dateFormat: e.target.value as Corrections["dateFormat"] })}
-            className="min-h-10 rounded-lg border-2 border-ink bg-paper px-2 font-semibold"
+            className="min-h-10 rounded-lg border border-black/15 bg-white px-2 font-semibold"
           >
             <option value="mdy">March 4 (month first)</option>
             <option value="dmy">3 April (day first)</option>
             <option value="ymd">Year first (2026-03-04)</option>
           </select>
-          {mapping.dateFormatAmbiguous ? <span className="rounded-full bg-sun px-2 py-0.5 text-xs font-bold">Please confirm</span> : null}
+          {mapping.dateFormatAmbiguous ? <span className="rounded-[2px] bg-sun px-2 py-0.5 font-mono text-[11px] font-bold">Please confirm</span> : null}
         </div>
       ) : null}
 
@@ -163,12 +163,12 @@ export function ReviewStep({
             {unknown.map((i) => {
               const raw = rows[i.rows[0]][mapping.byColumn.indexOf("status")] || "(blank)";
               return (
-                <li key={i.statusKey} className="flex flex-wrap items-center gap-3 rounded-xl border-2 border-ink bg-white/60 p-3">
+                <li key={i.statusKey} className="flex flex-wrap items-center gap-3 rounded-2xl border border-black/10 bg-white p-3">
                   <span className="font-bold">“{raw}”</span>
                   <span className="text-sm text-muted">{i.rows.length} {i.rows.length === 1 ? "row" : "rows"}</span>
                   <select
                     aria-label={`What does “${raw}” mean?`}
-                    className="ml-auto min-h-10 rounded-lg border-2 border-ink bg-paper px-2 font-semibold"
+                    className="ml-auto min-h-10 rounded-lg border border-black/15 bg-white px-2 font-semibold"
                     value={corrections.statusOverrides[i.statusKey!] ?? ""}
                     onChange={(e) => {
                       const o = { ...corrections.statusOverrides };
@@ -194,7 +194,7 @@ export function ReviewStep({
           <h2 className="mt-10 text-xl font-extrabold">Heads up</h2>
           <ul className="mt-3 space-y-2" data-testid="issues">
             {otherIssues.map((i, k) => (
-              <li key={k} className={`rounded-xl border-2 p-3 text-sm ${i.level === "warn" ? "border-ink bg-sun/40" : "border-line bg-white/50"}`}>
+              <li key={k} className={`rounded-xl border p-3 text-sm ${i.level === "warn" ? "border-ink bg-sun/40" : "border-line bg-white/50"}`}>
                 {i.message}
                 {i.kind !== "company_merged" && i.rows.length <= 12 ? (
                   <span className="text-muted"> Rows {i.rows.map((r) => r + (result.hasHeader ? 2 : 1)).join(", ")}.</span>
@@ -219,7 +219,7 @@ export function ReviewStep({
       {uncertainRows.length ? (
         <>
           <h2 className="mt-10 text-xl font-extrabold">Rows worth a look</h2>
-          <ul className="mt-3 divide-y divide-line rounded-2xl border-2 border-ink bg-white/60 text-sm">
+          <ul className="mt-3 divide-y divide-line rounded-2xl border border-black/10 bg-white text-sm">
             {uncertainRows.slice(0, 8).map((r) => (
               <li key={r} className="flex gap-3 p-3">
                 <span className="w-16 shrink-0 text-muted">Row {r + (result.hasHeader ? 2 : 1)}</span>
@@ -240,7 +240,7 @@ export function ReviewStep({
       ) : null}
 
       <div className="mt-12 flex justify-end">
-        <button type="button" className="btn btn-accent" onClick={onPlay} disabled={!hasCompany || count === 0 || busy}>
+        <button type="button" className="mbtn mbtn-blue" onClick={onPlay} disabled={!hasCompany || count === 0 || busy}>
           Play my story →
         </button>
       </div>

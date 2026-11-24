@@ -187,3 +187,15 @@ test("large pastes are parsed in a Web Worker", async ({ page }, info) => {
   await expect(page.getByRole("heading", { name: /applications/ })).toContainText(/^2,?99\d|^3,?000/);
   expect(workers.length).toBe(1);
 });
+
+test("landing carousel: arrows change the caption; the front card opens its sample", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" }); // no auto-rotation, so the front card is stable
+  await page.goto("/");
+  const caption = page.locator('[aria-live="polite"] p').first();
+  await expect(caption).toHaveText("The Marathoner");
+  await page.getByRole("button", { name: "Next card" }).click();
+  await expect(caption).toHaveText("The Closer");
+  await page.waitForTimeout(600); // let the ring settle on the new card
+  await page.getByRole("link", { name: /Play the Closer sample/ }).first().click();
+  await expect(page).toHaveURL(/\/sample\/closer/);
+});

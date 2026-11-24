@@ -25,13 +25,15 @@ for (const id of SAMPLE_IDS) {
       fs.writeFileSync(path.join(root, `docs/exports/${id}-${style}-${size}.png`), renderCardPng(card, size));
     }
   }
-  // landing thumbnail: achievement, landscape, webp at 2/3 scale
-  const card = cardFromSummary(sampleSummary(id, "achievement"));
-  renderCardPng(card, "landscape"); // registers fonts
-  const c = createCanvas(800, 420);
-  const ctx = c.getContext("2d") as unknown as Ctx;
-  (ctx as unknown as { scale: (x: number, y: number) => void }).scale(800 / 1200, 420 / 630);
-  drawCard(ctx, card, "landscape", Path2D as unknown as Path2DCtor);
-  fs.writeFileSync(path.join(root, `public/samples/${id}.webp`), c.toBuffer("image/webp", 82));
+  // landing carousel: every style, landscape, WebP at 720×378
+  for (const style of CARD_STYLES) {
+    const card = cardFromSummary(sampleSummary(id, style));
+    renderCardPng(card, "landscape"); // registers fonts
+    const c = createCanvas(720, 378);
+    const ctx = c.getContext("2d") as unknown as Ctx;
+    (ctx as unknown as { scale: (x: number, y: number) => void }).scale(720 / 1200, 378 / 630);
+    drawCard(ctx, card, "landscape", Path2D as unknown as Path2DCtor);
+    fs.writeFileSync(path.join(root, `public/samples/${id}-${style}.webp`), c.toBuffer("image/webp", 86));
+  }
   console.log(id, sampleSummary(id).persona, sampleSummary(id).total);
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { SiteHeader } from "../SiteHeader";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { DateFormat, FieldKey, ImportResult, Status } from "@/lib/model/types";
 import { MAX_INPUT, runImport } from "@/lib/import/run";
@@ -130,28 +131,28 @@ export function MakeFlow() {
   }
 
   return (
-    <div className="min-h-dvh">
-      <header className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4 sm:px-6">
-        <Link href="/" className="text-lg font-extrabold tracking-tight">
-          Co-op Wrapped
-        </Link>
-        <span className="flex items-center gap-2 rounded-full border-2 border-ink px-3 py-1 text-xs font-bold">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" aria-hidden><rect x="4" y="10" width="16" height="11" rx="2" /><path d="M8 10V7a4 4 0 0 1 8 0v3" /></svg>
-          Stays in your browser
-        </span>
-      </header>
+    <div className="min-h-dvh bg-[#fbfbfa]">
+      <SiteHeader
+        right={
+          <span className="flex items-center gap-1.5 text-[14px]">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" aria-hidden><rect x="4" y="10" width="16" height="11" rx="2" /><path d="M8 10V7a4 4 0 0 1 8 0v3" /></svg>
+            Stays in your browser
+          </span>
+        }
+      />
 
       <main className="mx-auto max-w-5xl px-4 pb-20 sm:px-6">
         {stage === "input" || !result ? (
           <section aria-labelledby="input-title" className="mx-auto max-w-2xl pt-6">
-            <h1 id="input-title" className="text-[clamp(2.4rem,8vw,4.2rem)] font-extrabold leading-[0.95] tracking-[-0.04em]">
-              Paste your <span className="font-serif-i font-normal">tracker.</span>
+            <h1 id="input-title" className="font-pixel text-[clamp(2.4rem,8vw,4rem)] leading-[1]">
+              Paste your tracker
+
             </h1>
             <p className="mt-4 text-lg">
               Select the cells in Google Sheets, Excel or Numbers — header row included — copy, and paste below. Only a company column is required.
             </p>
 
-            <label htmlFor="paste" className="mt-8 block text-xs font-bold uppercase tracking-[0.14em]">
+            <label htmlFor="paste" className="mt-8 block font-mono text-xs font-bold uppercase tracking-[0.14em]">
               Your applications
             </label>
             <textarea
@@ -175,7 +176,7 @@ export function MakeFlow() {
               rows={9}
               spellCheck={false}
               placeholder={"Company · Role · Date applied · Status\nNorthwind Labs · Dev Co-op · Jan 12 · Interviewing\nMaple Byte · Data Intern · Jan 14 · Applied\n…paste your rows here"}
-              className="mt-2 w-full rounded-2xl border-[2.5px] border-ink bg-white/70 p-4 font-mono text-sm leading-relaxed shadow-[4px_4px_0_var(--ink)] placeholder:text-muted/70"
+              className="mt-2 w-full rounded-2xl border border-black/10 bg-white p-4 font-mono text-sm leading-relaxed shadow-[0_10px_30px_-20px_rgb(0_0_0/0.4)] placeholder:text-muted/70"
               aria-describedby="paste-help privacy-note"
               data-testid="paste-input"
             />
@@ -183,26 +184,26 @@ export function MakeFlow() {
               Messy is fine: we detect columns, normalize statuses like “rejected 😭”, and show you everything before the story starts.
             </p>
             {error ? (
-              <p role="alert" className="mt-3 rounded-xl border-2 border-tomato bg-tomato/10 p-3 text-sm font-semibold">
+              <p role="alert" className="mt-3 rounded-xl border border-tomato bg-tomato/10 p-3 text-sm font-semibold">
                 {error}
               </p>
             ) : null}
 
             <div className="mt-6 flex flex-wrap items-center gap-3">
-              <button type="button" className="btn btn-primary" onClick={() => process(text, source, corr)} disabled={busy} data-testid="continue">
+              <button type="button" className="mbtn mbtn-ink" onClick={() => process(text, source, corr)} disabled={busy} data-testid="continue">
                 {busy ? "Reading…" : "Continue"}
               </button>
-              <button type="button" className="btn btn-secondary" onClick={() => fileRef.current?.click()}>
+              <button type="button" className="mbtn mbtn-ghost" onClick={() => fileRef.current?.click()}>
                 Upload CSV
               </button>
               <input ref={fileRef} type="file" accept=".csv,.tsv,.txt,text/csv,text/tab-separated-values" className="sr-only" onChange={(e) => onFile(e.target.files?.[0])} data-testid="file-input" aria-label="Upload a CSV file" />
             </div>
 
-            <div className="mt-10 rounded-2xl border-2 border-dashed border-ink/40 p-4">
+            <div className="mt-10 rounded-2xl border border-dashed border-black/15 p-4">
               <p className="text-sm font-bold">No spreadsheet handy? Try a sample:</p>
               <div className="mt-3 flex flex-wrap gap-2">
                 {SAMPLE_IDS.map((id) => (
-                  <Link key={id} href={`/sample/${id}?via=make`} className="rounded-full border-2 border-ink px-3.5 py-2 text-sm font-bold hover:bg-ink hover:text-paper">
+                  <Link key={id} href={`/sample/${id}?via=make`} className="rounded-full border border-black/15 px-3.5 py-2 text-[14px] font-semibold hover:bg-ink hover:text-white">
                     {SAMPLES[id].label} <span className="font-normal opacity-75">· {SAMPLES[id].blurb}</span>
                   </Link>
                 ))}

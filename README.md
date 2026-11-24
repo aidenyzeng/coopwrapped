@@ -76,7 +76,7 @@ Data flow: `text → parseTable → detectColumns → buildApplications (+issues
 - **Fonts are self-hosted** (Bricolage Grotesque variable woff2 for the web; static TTFs for the server). They're registered under their real family names because Skia collapses several weights registered under one alias.
 - **Share links store a summary, not a token in the URL.** Server-side social previews need server-side data (URL fragments never reach the server), and storage enables deletion. The stored summary is integers + enums only — no strings from the spreadsheet can be stored even by a modified client.
 - **No accounts, no database.** A key-value store is the only infrastructure, used only for opt-in links.
-- **Landing page is a server component with a CSS-only animated reel** so it ships almost no JS; Motion loads only on story routes.
+- **Landing page is a single screen** (no scroll at 360×640 → 1920×1080; checked by `scripts/check-landing-fit.ts`). It is deliberately minimal: a wordmark that blurs into focus, a one-line value proposition, and a slowly turning CSS-3D ring of real sample cards (3 personas × 3 styles, rendered by `scripts/render-samples.ts`). The ring can be dragged/swiped, pauses on hover, is still under reduced motion, and its caption names the front card; clicking the front card plays that sample. No WebGL and no images beyond the 14–27 KB card thumbnails.
 - **Exact duplicates are counted once by default** (with a visible warning and a toggle); near-duplicates are only flagged, because re-applying to the same company is normal.
 
 ## Metric semantics
@@ -112,12 +112,12 @@ The held-out first run is the most honest number. After it was recorded, the two
 
 | Page | Perf runs | Perf | A11y | Best practices | SEO | LCP | TBT | CLS | JS transferred |
 |---|---|---|---|---|---|---|---|---|---|
-| `/` | 100, 100, 100 | 100 | 100 | 100 | 100 | 0.8 s | 10 ms | 0 | 245 KB |
+| `/` (minimal ring redesign) | 100, 100, 100 | 100 | 100 | 100 | 100 | 0.8 s | 10 ms | 0.001 | — |
 | `/sample/marathoner` (story) | 100, 100, 100 | 100 | 100 | 100 | 100 | 0.8 s | 10 ms | 0 | 239 KB |
 | `/make` | 100, 100, 100 | 100 | 100 | 100 | 100 | 0.8 s | 10 ms | 0 | 245 KB |
 | `/r/[id]` (replay) | 100, 100, 100 | 100 | 100 | 100 | 60 | 0.6 s | 10 ms | 0 | 218 KB |
 
-Replay SEO is 60 because shared recaps are intentionally `noindex`. Localhost has no real network latency even under simulated throttling; re-measure after deploying.
+Replay SEO is 60 because shared recaps are intentionally `noindex`. The landing row was re-measured after the minimal ring redesign; the other rows are from the earlier measurement. Localhost has no real network latency even under simulated throttling; re-measure after deploying.
 
 ## Known limitations
 

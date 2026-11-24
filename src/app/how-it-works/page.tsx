@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { SiteHeader } from "@/components/SiteHeader";
 import type { Metadata } from "next";
 import { PERSONAS } from "@/lib/persona/personas";
 
@@ -17,14 +17,13 @@ function H2({ children, id }: { children: React.ReactNode; id: string }) {
 
 export default function Page() {
   return (
-    <div className="mx-auto max-w-3xl px-4 pb-24 sm:px-6">
-      <header className="flex items-center justify-between py-4">
-        <Link href="/" className="text-lg font-extrabold tracking-tight">Co-op Wrapped</Link>
-        <Link href="/make" className="btn btn-primary !min-h-0 !py-2 text-sm">Make yours</Link>
-      </header>
+    <div className="min-h-dvh bg-[#fbfbfa]">
+      <SiteHeader />
+      <div className="mx-auto max-w-3xl px-4 pb-24 sm:px-6">
+
       <main>
-        <h1 className="mt-8 text-[clamp(2.6rem,8vw,4.4rem)] font-extrabold leading-[0.92] tracking-[-0.04em]">
-          How it <span className="font-serif-i font-normal">works.</span>
+        <h1 className="font-pixel mt-10 text-[clamp(2.6rem,8vw,4.4rem)] leading-[1]">
+          How it works
         </h1>
         <p className="mt-5 text-lg leading-relaxed">
           Co-op Wrapped turns an application tracker into a short story. Here’s exactly what it does with your data and how every number is calculated.
@@ -78,14 +77,15 @@ export default function Page() {
         <p className="mt-4 leading-relaxed">Rules are checked in this order; the first one that matches is yours, so the same data always gets the same persona.</p>
         <ol className="mt-4 space-y-3">
           {PERSONAS.map((p, i) => (
-            <li key={p.id} className="rounded-2xl border-2 border-ink bg-white/50 p-4">
-              <span className="font-serif-i mr-2 text-xl">{i + 1}.</span>
+            <li key={p.id} className="rounded-2xl border border-black/10 bg-white p-4">
+              <span className="mr-2 font-mono text-sm text-ink/60">{String(i + 1).padStart(2, "0")}</span>
               <strong className="text-lg">{p.name}</strong>
               <p className="mt-1 text-[15px]">{p.rule}</p>
             </li>
           ))}
         </ol>
       </main>
+      </div>
     </div>
   );
 }
