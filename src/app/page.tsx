@@ -52,7 +52,6 @@ export default function Home() {
 
 
       <header className="flex shrink-0 items-center justify-end gap-6 px-5 pt-5 text-[16px] text-ink/60 sm:px-8 sm:pt-7 sm:text-[17px]">
-        <Link href="/how-it-works" className="hover:text-ink">How it works</Link>
         <TrackedLink href="/make" event="landing_cta" className="hover:text-ink">
           Make yours
         </TrackedLink>
@@ -72,7 +71,13 @@ export default function Home() {
           <TrackedLink href="/make" event="landing_cta" className="press rounded-full bg-ink px-5 py-2.5 text-[15px] font-semibold text-white hover:bg-black">
             Make your co-wrapped
           </TrackedLink>
-          <p className="text-[13px] text-ink/60">Runs in your browser. Your spreadsheet is never uploaded.</p>
+          <p className="text-[13px] text-ink/60">
+            Runs in your browser. Your spreadsheet is{" "}
+            <Link href="/how-it-works" className="underline decoration-ink/25 underline-offset-2 hover:text-ink hover:decoration-ink">
+              never uploaded
+            </Link>
+            .
+          </p>
         </div>
       </main>
     </div>

@@ -19,7 +19,6 @@ export function SiteHeader({ right }: { right?: ReactNode }) {
         <nav aria-label="Main" className="flex items-center gap-5 text-[15px] text-ink/60">
           {right ?? (
             <>
-              <Link href="/how-it-works" className="hidden hover:text-ink sm:inline">How it works</Link>
               <Link href="/sample/marathoner" className="hidden hover:text-ink sm:inline">Samples</Link>
               <Link href="/make" className="hover:text-ink">Make yours</Link>
             </>
