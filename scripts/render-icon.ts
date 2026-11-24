@@ -1,3 +1,8 @@
+/**
+ * Previews src/app/icon.svg at common sizes and writes the 180×180 Apple touch icon.
+ * (The SVG itself is generated from Allo's glyph outlines by scripts/make-icon.py.)
+ * Usage: npx tsx scripts/render-icon.ts <preview.png>
+ */
 import fs from "node:fs";
 import { chromium } from "@playwright/test";
 (async () => {

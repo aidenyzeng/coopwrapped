@@ -268,10 +268,11 @@ body {
 }
 
 /* ---------- Landing card ring: geometry in CSS so it paints before hydration ---------- */
-/* 18 panels: radius = w / (2·tan(10°)) ≈ 2.8356·w; card aspect 720:378 */
+/* 18 panels: radius = (w + gap) / (2·tan(10°)) ≈ 2.8356·(w + gap); card aspect 720:378.
+   gap = 6% of a card + 12px, so a hovered card (scaled 1.045) never touches its neighbours */
 .ring-stage {
   --w: min(38cqw, 620px, calc(80cqh * 1.9048));
-  --r: calc(var(--w) * 2.8356 + 6px);
+  --r: calc((var(--w) * 1.06 + 12px) * 2.8356);
   perspective: max(480px, calc(var(--r) * 0.8));
   perspective-origin: 50% 42%;
 }
