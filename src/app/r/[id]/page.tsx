@@ -14,8 +14,8 @@ export async function generateMetadata(props: PageProps<"/r/[id]">): Promise<Met
   const s = await load(id);
   if (!s) return { title: "Co-wrapped", robots: { index: false } };
   const persona = PERSONA_BY_ID[s.persona].name;
-  const title = `${s.total} applications · ${persona} — Co-wrapped`;
-  const description = "A co-op search, wrapped. See the recap, then make your own — your spreadsheet never leaves your browser.";
+  const title = `${s.total} applications, ${persona} | co-wrapped`;
+  const description = "A co-op search, wrapped. Make your own in a minute. Your spreadsheet never leaves your browser.";
   const image = { url: `/api/og/${id}`, width: 1200, height: 630, alt: `${s.total} applications. Search persona: ${persona}.` };
   return {
     title,

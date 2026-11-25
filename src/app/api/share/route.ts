@@ -10,7 +10,7 @@ export async function POST(req: Request) {
 
   const ip = (req.headers.get("x-forwarded-for") ?? "").split(",")[0].trim() || req.headers.get("x-real-ip") || "local";
   try {
-    if (await rateLimited(ip)) return NextResponse.json({ error: "Too many share links — try again later." }, { status: 429 });
+    if (await rateLimited(ip)) return NextResponse.json({ error: "Too many share links. Try again later." }, { status: 429 });
   } catch {
     return NextResponse.json({ error: "Share links are unavailable right now." }, { status: 503 });
   }

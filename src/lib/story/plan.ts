@@ -185,7 +185,7 @@ export function planStory(input: PlanInput): StoryPlan {
     const replyShare = m.responded / m.statusKnown;
     const quietShare = m.waiting / m.statusKnown;
     const variant = replyShare >= 0.5 ? "replies" : quietShare >= 0.7 ? "quiet" : "mixed";
-    const notes: string[] = ["Current status only — earlier stages may not be recorded."];
+    const notes: string[] = ["Current status only. Earlier stages may not be recorded."];
     if (sc.unknown > 0) notes.push(`${sc.unknown} with an unrecognized status not counted.`);
     if (m.statusBlank > 0) notes.push(`${m.statusBlank} with a blank status not counted.`);
     slides.push({

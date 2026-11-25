@@ -22,6 +22,28 @@ export interface Corrections {
   hasHeader?: boolean;
 }
 
+/** Confident enough to skip the review screen: company found for sure, nothing to confirm. */
+function isClean(r: ImportResult) {
+  const companyCol = r.mapping.byColumn.indexOf("company");
+  return (
+    r.applications.length > 0 &&
+    companyCol >= 0 &&
+    r.mapping.confidence[companyCol] >= 0.8 &&
+    r.mapping.byColumn.every((f, i) => !f || r.mapping.confidence[i] >= 0.5) &&
+    !r.mapping.dateFormatAmbiguous &&
+    !r.issues.some((i) => i.level === "warn" || i.kind === "unknown_status")
+  );
+}
+
+function trackCompleted(r: ImportResult, source: Source, corrected: boolean) {
+  track("import_completed", {
+    source,
+    rows: rowsBucket(r.applications.length),
+    columns_corrected: corrected,
+    warnings: r.issues.filter((i) => i.level === "warn").length,
+  });
+}
+
 export function MakeFlow() {
   const [stage, setStage] = useState<Stage>("input");
   const [text, setText] = useState("");
@@ -30,6 +52,7 @@ export function MakeFlow() {
   const [result, setResult] = useState<ImportResult | null>(null);
   const [corr, setCorr] = useState<Corrections>({ statusOverrides: {}, keepExactDuplicates: false });
   const [busy, setBusy] = useState(false);
+  const [dragging, setDragging] = useState(false);
   const ref = useMemo(() => today(), []);
   const fileRef = useRef<HTMLInputElement>(null);
   const corrected = corr.byColumn !== undefined || corr.dateFormat !== undefined || corr.hasHeader !== undefined || Object.keys(corr.statusOverrides).length > 0;
@@ -39,15 +62,15 @@ export function MakeFlow() {
   }, []);
 
   const process = useCallback(
-    async (input: string, src: Source, c: Corrections) => {
+    async (input: string, src: Source, c: Corrections, fresh = false) => {
       setError("");
       if (!input.trim()) {
-        setError("Paste a few rows (with headers if you have them) or upload a CSV.");
+        setError("Paste a few rows first, or upload a CSV.");
         track("import_failed", { source: src, reason: "empty" });
         return;
       }
       if (input.length > MAX_INPUT) {
-        setError("That’s more than 5 MB of text — try exporting just the applications tab.");
+        setError("That’s over 5 MB. Try copying just the applications tab.");
         track("import_failed", { source: src, reason: "too_large" });
         return;
       }
@@ -61,7 +84,12 @@ export function MakeFlow() {
           hasHeader: c.hasHeader,
         });
         setResult(r);
-        setStage("review");
+        // A clean import goes straight to the story; anything uncertain stops at the quick check.
+        // Closing the story always lands on the check, so columns can still be fixed.
+        if (fresh && isClean(r)) {
+          trackCompleted(r, src, false);
+          setStage("story");
+        } else setStage("review");
       } catch {
         setError("We couldn’t read that. Try copying the cells straight from your spreadsheet, or export a CSV.");
         track("import_failed", { source: src, reason: "parse_error" });
@@ -88,24 +116,19 @@ export function MakeFlow() {
       track("import_failed", { source, reason: "no_company" });
       return;
     }
-    track("import_completed", {
-      source,
-      rows: rowsBucket(result.applications.length),
-      columns_corrected: corrected,
-      warnings: result.issues.filter((i) => i.level === "warn").length,
-    });
+    trackCompleted(result, source, corrected);
     setStage("story");
   };
 
   const onFile = async (f: File | undefined) => {
     if (!f) return;
     if (f.size > MAX_INPUT) {
-      setError("That file is over 5 MB — try exporting just the applications sheet as CSV.");
+      setError("That file is over 5 MB. Try exporting just the applications sheet.");
       track("import_failed", { source: "file", reason: "too_large" });
       return;
     }
     if (/\.(xlsx|xls|numbers)$/i.test(f.name)) {
-      setError("That’s a spreadsheet file, not a CSV. Export as CSV, or just copy the cells and paste them here.");
+      setError("That’s a spreadsheet file. Copy the cells and paste them here, or export a CSV.");
       track("import_failed", { source: "file", reason: "parse_error" });
       return;
     }
@@ -114,7 +137,7 @@ export function MakeFlow() {
     setSource("file");
     const fresh = { statusOverrides: {}, keepExactDuplicates: false };
     setCorr(fresh);
-    void process(t, "file", fresh);
+    void process(t, "file", fresh, true);
   };
 
   if (stage === "story" && analysis) {
@@ -143,16 +166,13 @@ export function MakeFlow() {
 
       <main className="mx-auto max-w-5xl px-4 pb-20 sm:px-6">
         {stage === "input" || !result ? (
-          <section aria-labelledby="input-title" className="mx-auto max-w-2xl pt-6">
+          <section aria-labelledby="input-title" className="mx-auto max-w-2xl pt-6 sm:pt-12">
             <h1 id="input-title" className="font-pixel text-[clamp(2.4rem,8vw,4rem)] leading-[1]">
               Paste your tracker
-
             </h1>
-            <p className="mt-4 text-lg">
-              Select the cells in Google Sheets, Excel or Numbers — header row included — copy, and paste below. Only a company column is required.
-            </p>
+            <p className="mt-3 text-lg text-muted">Copy your rows from Sheets or Excel and paste them here.</p>
 
-            <label htmlFor="paste" className="mt-8 block font-mono text-xs font-bold uppercase tracking-[0.14em]">
+            <label htmlFor="paste" className="sr-only">
               Your applications
             </label>
             <textarea
@@ -170,28 +190,39 @@ export function MakeFlow() {
                   setSource("paste");
                   const fresh = { statusOverrides: {}, keepExactDuplicates: false };
                   setCorr(fresh);
-                  void process(pasted, "paste", fresh);
+                  void process(pasted, "paste", fresh, true);
                 }
               }}
-              rows={9}
+              onDragOver={(e) => {
+                if (e.dataTransfer.types.includes("Files")) {
+                  e.preventDefault();
+                  setDragging(true);
+                }
+              }}
+              onDragLeave={() => setDragging(false)}
+              onDrop={(e) => {
+                const f = e.dataTransfer.files?.[0];
+                setDragging(false);
+                if (f) {
+                  e.preventDefault();
+                  void onFile(f);
+                }
+              }}
+              rows={8}
               spellCheck={false}
-              placeholder={"Company · Role · Date applied · Status\nNorthwind Labs · Dev Co-op · Jan 12 · Interviewing\nMaple Byte · Data Intern · Jan 14 · Applied\n…paste your rows here"}
-              className="mt-2 w-full rounded-2xl border border-black/10 bg-white p-4 font-mono text-sm leading-relaxed shadow-[0_10px_30px_-20px_rgb(0_0_0/0.4)] placeholder:text-muted/70"
-              aria-describedby="paste-help privacy-note"
+              placeholder="Paste here, or drop a CSV"
+              className={`mt-6 w-full rounded-2xl border bg-white p-4 font-mono text-sm leading-relaxed shadow-[0_10px_30px_-20px_rgb(0_0_0/0.4)] transition-colors placeholder:text-muted/70 ${dragging ? "border-ink border-dashed bg-[#f4f3ef]" : "border-black/10"}`}
               data-testid="paste-input"
             />
-            <p id="paste-help" className="mt-2 text-sm text-muted">
-              Messy is fine: we detect columns, normalize statuses like “rejected 😭”, and show you everything before the story starts.
-            </p>
             {error ? (
               <p role="alert" className="mt-3 rounded-xl border border-tomato bg-tomato/10 p-3 text-sm font-semibold">
                 {error}
               </p>
             ) : null}
 
-            <div className="mt-6 flex flex-wrap items-center gap-3">
-              <button type="button" className="mbtn mbtn-ink" onClick={() => process(text, source, corr)} disabled={busy} data-testid="continue">
-                {busy ? "Reading…" : "Continue"}
+            <div className="mt-4 flex flex-wrap items-center gap-3">
+              <button type="button" className="mbtn mbtn-ink" onClick={() => process(text, source, corr, true)} disabled={busy} data-testid="continue">
+                {busy ? "Reading…" : "Make my story"}
               </button>
               <button type="button" className="mbtn mbtn-ghost" onClick={() => fileRef.current?.click()}>
                 Upload CSV
@@ -199,20 +230,14 @@ export function MakeFlow() {
               <input ref={fileRef} type="file" accept=".csv,.tsv,.txt,text/csv,text/tab-separated-values" className="sr-only" onChange={(e) => onFile(e.target.files?.[0])} data-testid="file-input" aria-label="Upload a CSV file" />
             </div>
 
-            <div className="mt-10 rounded-2xl border border-dashed border-black/15 p-4">
-              <p className="text-sm font-bold">No spreadsheet handy? Try a sample:</p>
-              <div className="mt-3 flex flex-wrap gap-2">
-                {SAMPLE_IDS.map((id) => (
-                  <Link key={id} href={`/sample/${id}?via=make`} className="press rounded-full border border-black/15 px-3.5 py-2 text-[14px] font-semibold hover:bg-ink hover:text-white">
-                    {SAMPLES[id].label} <span className="font-normal opacity-75">· {SAMPLES[id].blurb}</span>
-                  </Link>
-                ))}
-              </div>
+            <div className="mt-12 flex flex-wrap items-center gap-2">
+              <span className="mr-1 text-sm text-muted">No sheet? Try one:</span>
+              {SAMPLE_IDS.map((id) => (
+                <Link key={id} href={`/sample/${id}?via=make`} title={SAMPLES[id].blurb} className="press rounded-full border border-black/15 px-3.5 py-2 text-[14px] font-semibold hover:bg-ink hover:text-white">
+                  {SAMPLES[id].label}
+                </Link>
+              ))}
             </div>
-
-            <p id="privacy-note" className="mt-8 text-sm text-muted">
-              Your spreadsheet is read and analyzed in this browser tab. It isn’t uploaded, saved, or sent to analytics. Close the tab and it’s gone. Only if you later choose “Create share link” do a few summary numbers leave your device — and you’ll see exactly which.
-            </p>
           </section>
         ) : (
           <ReviewStep

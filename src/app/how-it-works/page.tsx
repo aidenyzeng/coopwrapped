@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { PERSONAS } from "@/lib/persona/personas";
 
 export const metadata: Metadata = {
-  title: "How it works — Co-wrapped",
+  title: "How it works | co-wrapped",
   description: "How Co-wrapped reads your spreadsheet, calculates each number, picks your persona, and what (if anything) leaves your browser.",
 };
 
@@ -33,7 +33,7 @@ export default function Page() {
         <ul className="mt-4 list-disc space-y-2 pl-5 leading-relaxed">
           <li>Your pasted text or CSV is parsed and analyzed <strong>in your browser</strong>. Large files are processed in a Web Worker, still on your device.</li>
           <li>Rows, company names, roles, dates and files are never uploaded and never sent to analytics. Nothing is saved after you close the tab.</li>
-          <li>Analytics events record only coarse actions (for example, “a card was exported in the Minimal style”) with allowlisted values. Exporting or tapping share does not mean anything was posted — we can’t see that, and don’t try.</li>
+          <li>Analytics events record only coarse actions (for example, “a card was exported in the Minimal style”) with allowlisted values. Exporting or tapping share does not mean anything was posted. We can’t see that, and don’t try.</li>
           <li>A <strong>share link</strong> is only created when you press “Create share link” and confirm. It stores your persona, your total, up to three numbers you picked, the card style and a visual seed. You can delete it from the same browser; links expire after a year.</li>
         </ul>
 
@@ -41,7 +41,7 @@ export default function Page() {
         <dl className="mt-4 space-y-5 leading-relaxed">
           <div>
             <dt className="font-extrabold">Applications</dt>
-            <dd>Rows with a company name. Exact duplicate rows (same company, role, date and status) are counted once by default — you’ll see a warning and can choose to count them. Similar rows with different details are kept, since re-applying is common.</dd>
+            <dd>Rows with a company name. Exact duplicate rows (same company, role, date and status) are counted once by default. You’ll see a warning and can choose to count them. Similar rows with different details are kept, since re-applying is common.</dd>
           </div>
           <div>
             <dt className="font-extrabold">Companies</dt>
@@ -53,7 +53,7 @@ export default function Page() {
           </div>
           <div>
             <dt className="font-extrabold">Interviews</dt>
-            <dd>We only talk about applications that “reached an interview” when your sheet records it — an interview date or yes/no column, a status like “Interviewing”, or wording like “rejected after interview”. An accepted offer is not assumed to have a recorded interview.</dd>
+            <dd>We only talk about applications that “reached an interview” when your sheet records it: an interview date or yes/no column, a status like “Interviewing”, or wording like “rejected after interview”. An accepted offer is not assumed to have a recorded interview.</dd>
           </div>
           <div>
             <dt className="font-extrabold">No recorded response</dt>

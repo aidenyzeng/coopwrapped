@@ -23,8 +23,8 @@ export function buildSummary(metrics: Metrics, persona: PersonaResult, seed: num
 }
 
 const STYLE_INFO: Record<CardStyle, { label: string; hint: string }> = {
-  achievement: { label: "Achievement", hint: "Clean and confident — LinkedIn" },
-  comedy: { label: "Comedy", hint: "Self-aware — X" },
+  achievement: { label: "Achievement", hint: "Clean, for LinkedIn" },
+  comedy: { label: "Comedy", hint: "Self-aware, for X" },
   minimal: { label: "Minimal", hint: "Big type, nothing extra" },
 };
 
@@ -124,7 +124,7 @@ export function ShareSheet({ open, onClose, metrics, persona, seed, topCompany, 
       const url = net === "x" ? `https://x.com/intent/post?text=${text}` : `https://www.linkedin.com/feed/?shareActive=true&text=${text}`;
       if (w) w.location.href = url;
       else window.open(url, "_blank", "noopener");
-      setNotice("Image saved. Attach it to your post — the caption is already filled in.");
+      setNotice("Image saved. Attach it to your post; the caption is filled in.");
     } catch {
       w?.close();
       setNotice("Couldn’t create the image. Try again?");
@@ -139,7 +139,7 @@ export function ShareSheet({ open, onClose, metrics, persona, seed, topCompany, 
       setNotice(method === "copy_caption" ? "Caption copied." : "Link copied.");
       track("share_action", { method });
     } catch {
-      setNotice("Copy failed — select the text and copy it manually.");
+      setNotice("Copy failed. Select the text and copy it.");
     }
   };
 
@@ -225,7 +225,7 @@ export function ShareSheet({ open, onClose, metrics, persona, seed, topCompany, 
           <div className="mt-3 flex gap-2" role="group" aria-label="Image size">
             {(["story", "landscape"] as const).map((s) => (
               <button key={s} type="button" aria-pressed={size === s} onClick={() => setSize(s)} className={`${seg} ${size === s ? "bg-ink text-paper" : ""}`} data-testid={`size-${s}`}>
-                {s === "story" ? "Story · 1080×1920" : "Post · 1200×630"}
+                {s === "story" ? "Story" : "Post"}
               </button>
             ))}
           </div>
@@ -243,7 +243,7 @@ export function ShareSheet({ open, onClose, metrics, persona, seed, topCompany, 
         <fieldset>
           <legend className="mb-1 text-xs font-bold uppercase tracking-[0.14em]">Stats on the card ({state.selected.length}/3)</legend>
           {avail.length === 0 ? (
-            <p className="text-sm text-muted">Your data doesn’t support extra stats yet — the card shows your total and persona.</p>
+            <p className="text-sm text-muted">No extra stats for this sheet yet.</p>
           ) : (
             <ul className="mt-2 space-y-1.5">
               {avail.map((s) => {
@@ -267,7 +267,7 @@ export function ShareSheet({ open, onClose, metrics, persona, seed, topCompany, 
               <input type="checkbox" className="h-5 w-5 accent-[var(--ink)]" checked={state.showCompany} onChange={(e) => setState({ ...state, showCompany: e.target.checked })} />
               <span>
                 Show a company name on the image{" "}
-                <span className="text-muted">(off by default · never included in share links)</span>
+                <span className="text-muted">(never in share links)</span>
               </span>
             </label>
           ) : null}
@@ -380,7 +380,7 @@ export function ShareSheet({ open, onClose, metrics, persona, seed, topCompany, 
               <p className="mt-3 text-sm font-bold">Checked first, didn’t apply:</p>
               <ul className="mt-1 list-disc space-y-0.5 pl-5 text-sm text-muted">
                 {persona.why.skipped.map((s) => (
-                  <li key={s.name}>{s.name} — {s.rule}</li>
+                  <li key={s.name}>{s.name}: {s.rule}</li>
                 ))}
               </ul>
             </>

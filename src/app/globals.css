@@ -302,6 +302,12 @@ body {
   transform: rotateY(var(--a)) translateZ(var(--r)) scale(var(--hs, 1));
 }
 
+/* side cards load after the page; they are decoded first, then fade in instead of popping */
+.ring-img-late {
+  transition: opacity 400ms ease;
+  @starting-style { opacity: 0; }
+}
+
 /* ---------- Tactile micro-interactions ---------- */
 /* ring cards grow slightly under the pointer (springy ease) */
 .ring-card {

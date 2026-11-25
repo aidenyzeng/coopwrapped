@@ -60,14 +60,12 @@ export function ReviewStep({
     <section aria-labelledby="review-title" className="pt-4">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="font-mono text-xs font-bold uppercase tracking-[0.14em]">Quick check</p>
-          <h1 id="review-title" className="font-pixel mt-1 text-[clamp(2rem,6vw,3.4rem)] leading-[1]">
+          <h1 id="review-title" className="font-pixel text-[clamp(2rem,6vw,3.4rem)] leading-[1]">
             {count} {count === 1 ? "application" : "applications"} found
           </h1>
           <p className="mt-2 text-muted">
-            From {rows.length} {rows.length === 1 ? "row" : "rows"}
-            {result.excludedRows.length ? ` · ${result.excludedRows.length} skipped` : ""}
-            {m ? ` · ${m.companies} ${m.companies === 1 ? "company" : "companies"}` : ""}. Fix anything that looks off — changes apply instantly.
+            {m ? `${m.companies} ${m.companies === 1 ? "company" : "companies"}` : `${rows.length} ${rows.length === 1 ? "row" : "rows"}`}
+            {result.excludedRows.length ? `, ${result.excludedRows.length} rows skipped` : ""}. Check the columns, then play.
           </p>
         </div>
         <div className="flex gap-3">
@@ -75,14 +73,14 @@ export function ReviewStep({
             Back
           </button>
           <button type="button" className="mbtn mbtn-blue" onClick={onPlay} disabled={!hasCompany || count === 0 || busy} data-testid="play-story">
-            Play my story →
+            Play my story
           </button>
         </div>
       </div>
 
       {!hasCompany ? (
         <p role="alert" className="mt-5 rounded-xl border border-tomato bg-tomato/10 p-3 font-semibold">
-          Pick which column holds the company name — it’s the one column we need.
+          Pick the column with company names.
         </p>
       ) : null}
 
@@ -98,7 +96,7 @@ export function ReviewStep({
             <li key={c} className="grid gap-2 p-3 sm:grid-cols-[1fr_auto] sm:items-center">
               <div className="min-w-0">
                 <p className="font-bold">{h || `Column ${c + 1}`}</p>
-                <p className="truncate text-sm text-muted">{examples.join(" · ") || "—"}</p>
+                <p className="truncate text-sm text-muted">{examples.join(", ") || "Empty"}</p>
               </div>
               <div className="flex items-center gap-2">
                 <label className="sr-only" htmlFor={`map-${c}`}>Use column “{h}” as</label>
@@ -157,8 +155,7 @@ export function ReviewStep({
 
       {unknown.length ? (
         <>
-          <h2 className="mt-10 text-xl font-extrabold">Statuses we didn’t recognize</h2>
-          <p className="text-sm text-muted">Tell us what these mean, or leave them — they’ll be left out of outcome stats.</p>
+          <h2 className="mt-10 text-xl font-extrabold">Unknown statuses</h2>
           <ul className="mt-3 space-y-2">
             {unknown.map((i) => {
               const raw = rows[i.rows[0]][mapping.byColumn.indexOf("status")] || "(blank)";
@@ -177,7 +174,7 @@ export function ReviewStep({
                       onChange({ ...corrections, statusOverrides: o });
                     }}
                   >
-                    <option value="">Not sure — leave out</option>
+                    <option value="">Leave out</option>
                     {STATUS_CHOICES.map((s) => (
                       <option key={s} value={s}>{STATUS_LABELS[s]}</option>
                     ))}
@@ -210,7 +207,7 @@ export function ReviewStep({
                 checked={corrections.keepExactDuplicates}
                 onChange={(e) => onChange({ ...corrections, keepExactDuplicates: e.target.checked })}
               />
-              Count exact duplicates separately (e.g. you really applied twice)
+              Count exact duplicates separately
             </label>
           ) : null}
         </>
@@ -227,7 +224,7 @@ export function ReviewStep({
                   {headers.map((h, c) =>
                     mapping.byColumn[c] && mapping.byColumn[c] !== "notes" ? (
                       <span key={c} className="mr-3 inline-block">
-                        <span className="text-muted">{FIELD_LABELS[mapping.byColumn[c]!]}:</span> {rows[r][c] || "—"}
+                        <span className="text-muted">{FIELD_LABELS[mapping.byColumn[c]!]}:</span> {rows[r][c] || "(empty)"}
                       </span>
                     ) : null,
                   )}
@@ -241,7 +238,7 @@ export function ReviewStep({
 
       <div className="mt-12 flex justify-end">
         <button type="button" className="mbtn mbtn-blue" onClick={onPlay} disabled={!hasCompany || count === 0 || busy}>
-          Play my story →
+          Play my story
         </button>
       </div>
     </section>

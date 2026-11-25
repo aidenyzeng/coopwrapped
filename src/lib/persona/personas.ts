@@ -45,7 +45,7 @@ export const PERSONAS: PersonaDef[] = [
   {
     id: "first_move",
     name: "The Opening Move",
-    rule: "Fewer than 8 applications — a small sample, so we keep it simple.",
+    rule: "Fewer than 8 applications, so we keep it simple.",
     match: (m) => (m.total < 8 ? m.total : null),
     sentence: (p) => `${s(p, "application")} out the door. Every search starts with a first send.`,
     tone: "mint",

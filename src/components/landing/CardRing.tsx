@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState, ViewTransition } from "react";
+import { flushSync } from "react-dom";
 import { track } from "@/lib/events/track";
 
 export interface RingItem {
@@ -17,7 +18,9 @@ export interface RingItem {
 
 const SPEED = 7; // degrees per second
 const HOVER_RATE = 0.25; // hovering slows the ring to a quarter speed (it never stops)
-const PANELS = 18; // 20° apart, two full cycles of the 9 sample cards: a full-width curved band
+const PANELS = 18;
+const SIZES = "(max-width: 639px) 80vw, (max-width: 1023px) 56vw, min(38vw, 620px)";
+const srcSet = (src: string) => `${src.replace(".webp", "-720.webp")} 720w, ${src} 1080w`; // 20° apart, two full cycles of the 9 sample cards: a full-width curved band
 
 /**
  * A slowly turning 3D ring of sample cards (CSS 3D, no WebGL).
@@ -44,7 +47,7 @@ export function CardRing({ items }: { items: RingItem[] }) {
   const loopRaf = useRef(0);
   const hover = useRef(false);
   const justDragged = useRef(false);
-  // index of the panel currently at the front (0..n-1); the caption uses its item
+  // panel that carries the story-frame morph name; set when a card is opened
   const [frontPanel, setFrontPanel] = useState(0);
   const frontRef = useRef(0);
   const [reduced, setReduced] = useState(false);
@@ -52,13 +55,23 @@ export function CardRing({ items }: { items: RingItem[] }) {
   // time so they never compete with the front card (the LCP element) for bandwidth.
   const [restReady, setRestReady] = useState(false);
   useEffect(() => {
-    const go = () => setRestReady(true);
+    // decode every card image first so the swap from placeholder to picture never shows a blank frame
+    const go = () =>
+      void Promise.allSettled(
+        items.map((it) => {
+          const im = new Image();
+          im.sizes = SIZES;
+          im.srcset = srcSet(it.src);
+          im.src = it.src;
+          return im.decode();
+        }),
+      ).then(() => setRestReady(true));
     const w = window as Window & { requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => number };
     if (document.readyState === "complete") {
       if (w.requestIdleCallback) w.requestIdleCallback(go, { timeout: 1200 });
       else setTimeout(go, 300);
     } else window.addEventListener("load", () => (w.requestIdleCallback ? w.requestIdleCallback(go, { timeout: 1200 }) : setTimeout(go, 300)), { once: true });
-  }, []);
+  }, [items]);
 
   useEffect(() => {
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -83,8 +96,7 @@ export function CardRing({ items }: { items: RingItem[] }) {
     (ang: number) => {
       const panel = ((Math.round(ang / step) % n) + n) % n;
       if (panel !== frontRef.current) {
-        frontRef.current = panel;
-        setFrontPanel(panel);
+        frontRef.current = panel; // no React state here: re-rendering 18 cards every turn caused hitches
         // tint the wordmark with the front card's colours (CSS @property animates the change)
         const pick = items[panel % items.length].pick;
         const root = document.documentElement.style;
@@ -264,7 +276,7 @@ export function CardRing({ items }: { items: RingItem[] }) {
                 draggable={false}
                 tabIndex={dup ? -1 : 0}
                 aria-hidden={dup || undefined}
-                aria-label={`Play the ${it.title.replace(/^The /, "")} sample — ${it.subtitle}`}
+                aria-label={`Play the ${it.title.replace(/^The /, "")} sample, ${it.subtitle}`}
                 onClick={(e) => {
                   if (justDragged.current) {
                     justDragged.current = false;
@@ -277,6 +289,8 @@ export function CardRing({ items }: { items: RingItem[] }) {
                     goTo(i);
                     return;
                   }
+                  // name this card for the morph into the story frame (sync update, before navigation starts)
+                  flushSync(() => setFrontPanel(i));
                   track("sample_selected", { sample: it.sample, from: "landing" });
                 }}
                 onFocus={() => goTo(i)}
@@ -291,8 +305,8 @@ export function CardRing({ items }: { items: RingItem[] }) {
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={it.src}
-                  srcSet={`${it.src.replace(".webp", "-720.webp")} 720w, ${it.src} 1080w`}
-                  sizes="(max-width: 639px) 80vw, (max-width: 1023px) 56vw, min(38vw, 620px)"
+                  srcSet={srcSet(it.src)}
+                  sizes={SIZES}
                   alt={dup ? "" : it.alt}
                   width={720}
                   height={378}
@@ -300,20 +314,21 @@ export function CardRing({ items }: { items: RingItem[] }) {
                   loading="eager"
                   fetchPriority={i === 0 ? "high" : i < 2 || i === n - 1 ? "auto" : "low"}
                   decoding="async"
-                  className="pointer-events-none h-full w-full object-cover"
+                  className={`pointer-events-none h-full w-full object-cover ${i < 2 || i === n - 1 ? "" : "ring-img-late"}`}
                 />
                 ) : (
                   <span aria-hidden className="block h-full w-full bg-[#f1efe9]" />
                 )}
               </Link>
             );
-            // the front card shares a name with the story frame: opening a sample morphs one into the other
-            return i === frontPanel ? (
-              <ViewTransition key={i} name="story-frame" share="morph" default="none">
+            // The front card shares a name with the story frame: opening a sample morphs one into the other.
+            // Every card keeps the same wrapper and only its name changes; swapping the wrapper type
+            // made React remount two cards (and re-decode their images) on every turn, which blinked.
+            const front = i === frontPanel;
+            return (
+              <ViewTransition key={i} name={front ? "story-frame" : `ring-${i}`} share={front ? "morph" : "none"} default="none">
                 {card}
               </ViewTransition>
-            ) : (
-              card
             );
           })}
         </div>

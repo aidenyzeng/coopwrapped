@@ -205,7 +205,7 @@ export function buildApplications(rows: string[][], mapping: ColumnMapping, opts
   if (inferredYear.length)
     issues.push({ kind: "ambiguous_date", rows: inferredYear, level: "info", message: `${plural(inferredYear.length, "date")} had no year; assumed ${fallbackYear}.` });
   if (future.length)
-    issues.push({ kind: "future_date", rows: future, level: "warn", message: `${plural(future.length, "date")} ${verb(future.length, "is", "are")} in the future — check the date format.` });
+    issues.push({ kind: "future_date", rows: future, level: "warn", message: `${plural(future.length, "date")} ${verb(future.length, "is", "are")} in the future. Check the date format.` });
 
   // Company spelling variants merged by the conservative key
   const variants = new Map<string, Set<string>>();
@@ -275,7 +275,7 @@ export function buildApplications(rows: string[][], mapping: ColumnMapping, opts
       kind: "possible_duplicate",
       rows: softRows,
       level: "info",
-      message: `${plural(soft.length, "company + role pair")} ${verb(soft.length, "appears", "appear")} more than once with different details. Kept them all — re-applications are common.`,
+      message: `${plural(soft.length, "company + role pair")} ${verb(soft.length, "appears", "appear")} more than once with different details. Kept them all, since re-applying is common.`,
     });
 
   return { applications: kept, excludedRows: [...new Set(excludedRows)].sort((a, b) => a - b), issues };

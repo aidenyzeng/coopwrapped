@@ -5,7 +5,7 @@ const SITE = process.env.NEXT_PUBLIC_SITE_URL || (process.env.NEXT_PUBLIC_VERCEL
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE),
-  title: "co-wrapped — your co-op search, as a story",
+  title: "co-wrapped | your co-op search, as a story",
   description:
     "Paste your co-op application tracker and get a personalized, shareable recap. Your spreadsheet is processed in your browser and never uploaded.",
   openGraph: {

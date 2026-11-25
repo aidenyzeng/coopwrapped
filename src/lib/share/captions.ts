@@ -15,14 +15,14 @@ export function captionSuggestions(s: PublicSummaryV1, url: string): Record<Capt
     const d = statDisplay(st);
     return `${d.value} ${d.label}`;
   });
-  const statSentence = statLines.length ? ` ${statLines.join(" · ")}.` : "";
+  const statSentence = statLines.length ? ` ${statLines.join(", ")}.` : "";
 
   const professional = [
     offer
       ? s.persona === "closer"
         ? `My co-op search, by the numbers: ${s.total} applications and one signed offer. Grateful to everyone who reviewed a resume or ran a mock interview with me.${statSentence}`
         : `My co-op search, by the numbers: ${s.total} applications and an offer on the table. Grateful for everyone who helped along the way.${statSentence}`
-      : `My co-op search so far: ${s.total} applications and counting.${statSentence} Still looking — if your team is hiring, I’d love to connect.`,
+      : `My co-op search so far: ${s.total} applications and counting.${statSentence} Still looking. If your team is hiring, I’d love to connect.`,
     `I turned my application tracker into a recap. Turns out I’m “${p.name}.”${statSentence}`,
   ];
 

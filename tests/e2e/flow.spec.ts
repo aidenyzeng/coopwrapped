@@ -1,6 +1,21 @@
 import fs from "node:fs";
 import { expect, test } from "@playwright/test";
+import type { Page } from "@playwright/test";
 import { events, fixture, goToEnd, noWebShare, pngSize, slideCount, slideIndex } from "./helpers";
+
+const story = (page: Page) => page.getByRole("region", { name: "Your co-op recap" });
+// a clean paste skips the quick check and plays right away; closing the story lands on the check
+async function toReview(page: Page) {
+  const review = page.getByRole("heading", { name: /applications? found/ });
+  await expect(review.or(story(page))).toBeVisible();
+  if (await story(page).isVisible()) await page.getByRole("button", { name: "Close story" }).click();
+  await expect(review).toBeVisible();
+}
+async function toStory(page: Page) {
+  await expect(page.getByTestId("play-story").first().or(story(page))).toBeVisible();
+  if (!(await story(page).isVisible())) await page.getByTestId("play-story").first().click();
+  await expect(story(page)).toBeVisible();
+}
 
 test("paste → review → story → export, with no spreadsheet data in analytics", async ({ page }, info) => {
   await noWebShare(page);
@@ -8,6 +23,7 @@ test("paste → review → story → export, with no spreadsheet data in analyti
   const text = fixture("01-messy-headers.tsv");
   await page.getByTestId("paste-input").fill(text);
   await page.getByTestId("continue").click();
+  await toReview(page);
   await expect(page.getByRole("heading", { name: /45 applications/ })).toBeVisible();
 
   // correct a mapping without restarting: un-map then re-map the role column
@@ -159,7 +175,7 @@ test("tiny and missing-data stories never show empty slides or NaN", async ({ pa
     await page.goto("/make");
     await page.getByTestId("paste-input").fill(fixture(f));
     await page.getByTestId("continue").click();
-    await page.getByTestId("play-story").first().click();
+    await toStory(page);
     await page.getByTestId("pause-toggle").click();
     const n = await slideCount(page);
     if (f === "05-tiny.csv") expect(n).toBeLessThanOrEqual(6);
@@ -184,6 +200,7 @@ test("large pastes are parsed in a Web Worker", async ({ page }, info) => {
   await page.goto("/make");
   await page.getByTestId("paste-input").fill(rows.join("\n"));
   await page.getByTestId("continue").click();
+  await toReview(page);
   await expect(page.getByRole("heading", { name: /applications/ })).toContainText(/^2,?99\d|^3,?000/);
   expect(workers.length).toBe(1);
 });
@@ -192,7 +209,7 @@ test("landing carousel: clicking a side card brings it to the front; the front c
   await page.emulateMedia({ reducedMotion: "reduce" }); // no auto-rotation, so the front card is stable
   await page.goto("/");
   // the front card at load is the Marathoner sample
-  const front = page.getByRole("link", { name: /Play the Marathoner sample — Sample · Achievement style/ }).first();
+  const front = page.getByRole("link", { name: /Play the Marathoner sample, Achievement style sample/ }).first();
   await front.click();
   await expect(page).toHaveURL(/\/sample\/marathoner/);
 });

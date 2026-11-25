@@ -205,7 +205,7 @@ export function detectColumns(headers: string[], dataRows: string[][], hasHeader
     if (best >= 0) {
       byColumn[best] = "company";
       confidence[best] = 0.3;
-      why[best] = "Best guess — please confirm";
+      why[best] = "Best guess, please confirm";
     }
   }
 

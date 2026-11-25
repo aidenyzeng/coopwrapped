@@ -27,7 +27,7 @@ const ITEMS: RingItem[] = CARD_STYLES.flatMap((_, si) =>
       src: `/samples/${id}-${style}.webp`,
       href: `/sample/${id}`,
       title: SAMPLES[id].label,
-      subtitle: `Sample · ${STYLE_LABEL[style]} style`,
+      subtitle: `${STYLE_LABEL[style]} style sample`,
       alt: `${SAMPLES[id].label} sample card, ${style} style: ${total} applications.`,
       sample: id,
       pick: [style === "minimal" ? "#111111" : deep, "#111111", deep] as [string, string, string],
