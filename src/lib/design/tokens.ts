@@ -48,7 +48,7 @@ export const PRODUCT_NAME = "Co-wrapped";
 
 /** Hostname printed on cards. Configure NEXT_PUBLIC_SITE_URL before launch. */
 export function siteHost(): string {
-  const url = process.env.NEXT_PUBLIC_SITE_URL || "https://cowrapped.app";
+  const url = process.env.NEXT_PUBLIC_SITE_URL || (process.env.NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL}` : "https://cowrapped.app");
   return url.replace(/^https?:\/\//, "").replace(/\/$/, "");
 }
 

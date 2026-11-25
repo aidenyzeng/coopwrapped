@@ -30,7 +30,7 @@ const STYLE_INFO: Record<CardStyle, { label: string; hint: string }> = {
 
 const noopSubscribe = () => () => {};
 
-const SITE = (process.env.NEXT_PUBLIC_SITE_URL || "https://cowrapped.app").replace(/\/$/, "");
+const SITE = (process.env.NEXT_PUBLIC_SITE_URL || (process.env.NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL}` : "https://cowrapped.app")).replace(/\/$/, "");
 
 interface Props {
   open: boolean;

@@ -103,7 +103,9 @@ function fileStore(dir: string): Backend {
 let backend: Backend | null = null;
 function store(): Backend {
   if (backend) return backend;
-  const { UPSTASH_REDIS_REST_URL: url, UPSTASH_REDIS_REST_TOKEN: token } = process.env;
+  // Vercel's Upstash integration names these KV_REST_API_*; a manual setup uses UPSTASH_REDIS_REST_*
+  const url = process.env.UPSTASH_REDIS_REST_URL || process.env.KV_REST_API_URL;
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN || process.env.KV_REST_API_TOKEN;
   backend = url && token ? upstash(url, token) : fileStore(path.join(process.cwd(), ".data", "shares"));
   return backend;
 }
